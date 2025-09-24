@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
 
 import { navigateHandler } from './tools/navigate.js'
+import { reloadHandler } from './tools/reload.js'
 import { consoleHandler } from './tools/console.js'
 import { queryDomHandler } from './tools/query-dom.js'
 import { queryHtmlHandler } from './tools/query-html.js'
@@ -28,6 +29,15 @@ export class Server {
         inputSchema: { url: z.string().describe('The URL to navigate to') }
       },
       navigateHandler
+    )
+
+    this.mcpServer.registerTool(
+      'browser-reload',
+      {
+        title: 'Reload Page',
+        description: 'Reload the current page and refresh console logs'
+      },
+      reloadHandler
     )
 
     this.mcpServer.registerTool(

@@ -31,6 +31,14 @@ Navigate the browser to a specific URL and start monitoring the page.
 
 **Example:** Navigate to `http://localhost:3000`
 
+### `browser-reload`
+
+Reload the current page and refresh console logs.
+
+**No parameters required**
+
+**Use case:** Refresh the page after code changes or to clear current state
+
 ### `browser-console`
 
 Retrieve all console messages (logs, errors, warnings) from the current page.
