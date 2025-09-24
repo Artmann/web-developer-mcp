@@ -1,11 +1,14 @@
 {
   "name": "webdev-mcp",
+  "author": "Christoffer Artmann <artgaard@gmail.com>",
+  "version": "1.0.0",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
   "scripts": {
     "format": "prettier --write .",
-    "start": "bun src/index.ts"
+    "start": "bun src/index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
     "typescript": "^5"
