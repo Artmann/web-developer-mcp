@@ -23,7 +23,8 @@ export class Server {
       'browser-navigate',
       {
         title: 'Navigate Browser',
-        description: 'Navigate the browser to a specific URL and start monitoring the page',
+        description:
+          'Navigate the browser to a specific URL and start monitoring the page',
         inputSchema: { url: z.string().describe('The URL to navigate to') }
       },
       navigateHandler
@@ -33,7 +34,8 @@ export class Server {
       'browser-console',
       {
         title: 'Get Console Output',
-        description: 'Retrieve all console messages (logs, errors, warnings) from the current page'
+        description:
+          'Retrieve all console messages (logs, errors, warnings) from the current page'
       },
       consoleHandler
     )
@@ -42,8 +44,15 @@ export class Server {
       'inspect-elements',
       {
         title: 'Inspect DOM Elements',
-        description: 'Get detailed information about DOM elements including styles, position, visibility, and attributes',
-        inputSchema: { selector: z.string().describe('CSS selector to query elements (e.g. ".button", "#header", "div[data-test]")') }
+        description:
+          'Get detailed information about DOM elements including styles, position, visibility, and attributes',
+        inputSchema: {
+          selector: z
+            .string()
+            .describe(
+              'CSS selector to query elements (e.g. ".button", "#header", "div[data-test]")'
+            )
+        }
       },
       queryDomHandler
     )
@@ -52,8 +61,15 @@ export class Server {
       'extract-html',
       {
         title: 'Extract HTML',
-        description: 'Extract raw HTML markup of elements for testing or analysis (similar to React Testing Library queries)',
-        inputSchema: { selector: z.string().describe('CSS selector to extract HTML from (e.g. ".alert", "[role=dialog]")') }
+        description:
+          'Extract raw HTML markup of elements for testing or analysis (similar to React Testing Library queries)',
+        inputSchema: {
+          selector: z
+            .string()
+            .describe(
+              'CSS selector to extract HTML from (e.g. ".alert", "[role=dialog]")'
+            )
+        }
       },
       queryHtmlHandler
     )

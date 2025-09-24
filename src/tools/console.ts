@@ -1,18 +1,20 @@
 import { BrowserManager } from '../browser/BrowserManager.js'
+import { createSuccessResponse, createErrorResponse } from '../response.js'
 
 export async function consoleHandler() {
-  const browserManager = BrowserManager.getInstance()
-  const consoleLogs = browserManager.getConsoleLogs()
+  try {
+    const browserManager = BrowserManager.getInstance()
+    const consoleLogs = browserManager.getConsoleLogs()
 
-  return {
-    content: [
-      {
-        type: 'text' as const,
-        text:
-          consoleLogs.length > 0
-            ? consoleLogs.join('\n')
-            : 'No console logs available.'
-      }
-    ]
+    const text =
+      consoleLogs.length > 0
+        ? consoleLogs.join('\n')
+        : 'No console logs available.'
+
+    return createSuccessResponse(text)
+  } catch (error) {
+    return createErrorResponse(
+      `Failed to retrieve console logs: ${error instanceof Error ? error.message : String(error)}`
+    )
   }
 }

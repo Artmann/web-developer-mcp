@@ -1,4 +1,5 @@
 import { BrowserManager } from '../browser/BrowserManager.js'
+import { createSuccessResponse, createErrorResponse } from '../response.js'
 
 interface DOMElement {
   attributes: Record<string, string>
@@ -28,21 +29,16 @@ interface DOMElement {
 }
 
 export async function queryDomHandler({ selector }: { selector: string }) {
-  const browserManager = BrowserManager.getInstance()
-  const page = browserManager.getPage()
-
-  if (!page) {
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: 'No page is currently loaded. Please navigate to a page first.'
-        }
-      ]
-    }
-  }
-
   try {
+    const browserManager = BrowserManager.getInstance()
+    const page = browserManager.getPage()
+
+    if (!page) {
+      return createErrorResponse(
+        'No page is currently loaded. Please navigate to a page first.'
+      )
+    }
+
     const elements = await page.$$eval(selector, (els): DOMElement[] => {
       return els.map((el): DOMElement => {
         const computedStyle = (globalThis as any).getComputedStyle(el)
@@ -88,40 +84,25 @@ export async function queryDomHandler({ selector }: { selector: string }) {
     })
 
     if (elements.length === 0) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: `No elements found matching selector: ${selector}`
-          }
-        ]
-      }
+      return createSuccessResponse(
+        `No elements found matching selector: ${selector}`
+      )
     }
 
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: JSON.stringify(
-            {
-              selector,
-              count: elements.length,
-              elements: elements
-            },
-            null,
-            2
-          )
-        }
-      ]
-    }
+    const result = JSON.stringify(
+      {
+        count: elements.length,
+        elements: elements,
+        selector
+      },
+      null,
+      2
+    )
+
+    return createSuccessResponse(result)
   } catch (error) {
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: `Error querying DOM elements: ${error instanceof Error ? error.message : String(error)}`
-        }
-      ]
-    }
+    return createErrorResponse(
+      `Failed to query DOM elements with selector '${selector}': ${error instanceof Error ? error.message : String(error)}`
+    )
   }
 }
