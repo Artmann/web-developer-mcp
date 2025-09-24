@@ -1,9 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import { chromium, type Browser } from 'playwright'
+import { chromium, type Browser, type Page } from 'playwright'
 import { z } from 'zod'
 
 let browserInstance: Browser | null = null
+let currentPage: Page | null = null
 
 async function getBrowserInstance(): Promise<Browser> {
   if (!browserInstance) {
@@ -42,6 +43,7 @@ async function visitPage(url: string) {
   })
 
   await page.goto(url)
+  currentPage = page
 }
 
 async function main() {
@@ -85,6 +87,129 @@ async function main() {
                 : 'No console logs available.'
           }
         ]
+      }
+    }
+  )
+
+  server.registerTool(
+    'query-dom-elements',
+    {
+      title: 'Query DOM Elements',
+      description: 'Query DOM elements using a CSS selector',
+      inputSchema: { selector: z.string() }
+    },
+    async ({ selector }) => {
+      if (!currentPage) {
+        return {
+          content: [{ type: 'text', text: 'No page is currently loaded. Please navigate to a page first.' }]
+        }
+      }
+
+      try {
+        const elements = await currentPage.$$eval(selector, (els) => {
+          return els.map(el => {
+            const computedStyle = window.getComputedStyle(el)
+            const rect = el.getBoundingClientRect()
+            
+            return {
+              tagName: el.tagName.toLowerCase(),
+              id: el.id || null,
+              className: el.className || null,
+              textContent: el.textContent?.trim().substring(0, 100) || null,
+              innerHTML: el.innerHTML.substring(0, 200),
+              attributes: Array.from(el.attributes).reduce((acc, attr) => {
+                acc[attr.name] = attr.value
+                return acc
+              }, {} as Record<string, string>),
+              position: {
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height
+              },
+              styles: {
+                display: computedStyle.display,
+                position: computedStyle.position,
+                color: computedStyle.color,
+                backgroundColor: computedStyle.backgroundColor,
+                fontSize: computedStyle.fontSize,
+                fontWeight: computedStyle.fontWeight,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                zIndex: computedStyle.zIndex
+              },
+              isVisible: rect.width > 0 && rect.height > 0 && computedStyle.visibility !== 'hidden' && computedStyle.display !== 'none'
+            }
+          })
+        })
+
+        if (elements.length === 0) {
+          return {
+            content: [{ type: 'text', text: `No elements found matching selector: ${selector}` }]
+          }
+        }
+
+        return {
+          content: [{ 
+            type: 'text', 
+            text: JSON.stringify({
+              selector,
+              count: elements.length,
+              elements: elements
+            }, null, 2)
+          }]
+        }
+      } catch (error) {
+        return {
+          content: [{ 
+            type: 'text', 
+            text: `Error querying DOM elements: ${error instanceof Error ? error.message : String(error)}` 
+          }]
+        }
+      }
+    }
+  )
+
+  server.registerTool(
+    'query-html',
+    {
+      title: 'Query HTML',
+      description: 'Get the raw HTML of elements matching a CSS selector',
+      inputSchema: { selector: z.string() }
+    },
+    async ({ selector }) => {
+      if (!currentPage) {
+        return {
+          content: [{ type: 'text', text: 'No page is currently loaded. Please navigate to a page first.' }]
+        }
+      }
+
+      try {
+        const htmlElements = await currentPage.$$eval(selector, (els) => {
+          return els.map(el => el.outerHTML)
+        })
+
+        if (htmlElements.length === 0) {
+          return {
+            content: [{ type: 'text', text: `No elements found matching selector: ${selector}` }]
+          }
+        }
+
+        const htmlOutput = htmlElements.join('\n\n')
+
+        return {
+          content: [{ 
+            type: 'text', 
+            text: htmlOutput
+          }]
+        }
+      } catch (error) {
+        return {
+          content: [{ 
+            type: 'text', 
+            text: `Error querying HTML: ${error instanceof Error ? error.message : String(error)}` 
+          }]
+        }
       }
     }
   )
