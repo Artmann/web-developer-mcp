@@ -1,5 +1,5 @@
-import { BrowserManager } from '../browser/BrowserManager.js'
-import { createSuccessResponse, createErrorResponse } from '../response.js'
+import { BrowserManager } from '../browser/BrowserManager'
+import { createSuccessResponse, createErrorResponse } from '../response'
 
 interface DOMElement {
   attributes: Record<string, string>

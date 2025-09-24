@@ -1,5 +1,5 @@
-import { Server } from './server.js'
-import { BrowserManager } from './browser/BrowserManager.js'
+import { Server } from './server'
+import { BrowserManager } from './browser/BrowserManager'
 
 async function main() {
   try {

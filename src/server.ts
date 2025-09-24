@@ -2,11 +2,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
 
-import { navigateHandler } from './tools/navigate.js'
-import { reloadHandler } from './tools/reload.js'
-import { consoleHandler } from './tools/console.js'
-import { queryDomHandler } from './tools/query-dom.js'
-import { queryHtmlHandler } from './tools/query-html.js'
+import { navigateHandler } from './tools/navigate'
+import { reloadHandler } from './tools/reload'
+import { consoleHandler } from './tools/console'
+import { queryDomHandler } from './tools/query-dom'
+import { queryHtmlHandler } from './tools/query-html'
 
 export class Server {
   private mcpServer: McpServer

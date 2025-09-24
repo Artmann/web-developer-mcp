@@ -1,5 +1,5 @@
-import { BrowserManager } from '../browser/BrowserManager.js'
-import { createSuccessResponse, createErrorResponse } from '../response.js'
+import { BrowserManager } from '../browser/BrowserManager'
+import { createSuccessResponse, createErrorResponse } from '../response'
 
 export async function navigateHandler({ url }: { url: string }) {
   try {
