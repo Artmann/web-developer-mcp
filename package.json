@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "start": "bun src/index.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
