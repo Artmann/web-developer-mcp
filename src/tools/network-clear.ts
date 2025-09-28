@@ -1,7 +1,7 @@
 import { BrowserManager } from '../browser/BrowserManager'
 import { createSuccessResponse, createErrorResponse } from '../response'
 
-export async function reloadHandler() {
+export async function networkClearHandler() {
   try {
     const browserManager = BrowserManager.getInstance()
     const page = browserManager.getPage()
@@ -12,12 +12,15 @@ export async function reloadHandler() {
       )
     }
 
-    await page.reload()
+    const previousCount = browserManager.getNetworkRequests().length
+    browserManager.clearNetworkRequests()
 
-    return createSuccessResponse('Page reloaded successfully')
+    return createSuccessResponse(
+      `Cleared ${previousCount} network request${previousCount !== 1 ? 's' : ''} from the buffer.`
+    )
   } catch (error) {
     return createErrorResponse(
-      `Failed to reload page: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to clear network requests: ${error instanceof Error ? error.message : String(error)}`
     )
   }
 }
