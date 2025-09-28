@@ -1,81 +1,27 @@
 # WebDev MCP Server
 
-A Model Context Protocol (MCP) server that provides web development tools
-through a Playwright-powered browser. This server allows AI assistants to
-inspect web pages, extract HTML, monitor console output, and analyze DOM
-elements in real-time.
+A Model Context Protocol (MCP) server that provides web development tools for coding AI assistants like **Claude Code**, **Cursor**, and other AI-powered development environments. This server enables AI assistants to inspect web pages, monitor network requests, extract HTML, analyze console output, and examine DOM elements in real-time through a Playwright-powered browser.
 
-Perfect for debugging web applications, testing UI components, and analyzing
-page behavior during development.
+Perfect for debugging web applications, testing UI components, analyzing API behavior, and understanding page behavior during development.
+
+## Why Use This?
+
+When working with AI coding assistants, you often need to:
+- Debug web applications and understand what's happening in the browser
+- Analyze network requests and API responses
+- Inspect DOM elements and their properties
+- Monitor console logs and errors
+- Extract HTML for testing or analysis
+
+This MCP server provides your AI assistant with direct browser access to help with these tasks.
 
 ## Features
 
-- **Live Browser Integration**: Uses Playwright with a persistent browser
-  session
-- **Real-time Monitoring**: Captures console logs, errors, and warnings as they
-  happen
-- **DOM Inspection**: Deep analysis of elements including styles, positioning,
-  and visibility
-- **HTML Extraction**: Raw markup extraction similar to React Testing Library
-  queries
-
-## Available Tools
-
-### `browser-navigate`
-
-Navigate the browser to a specific URL and start monitoring the page.
-
-**Parameters:**
-
-- `url` (string): The URL to navigate to
-
-**Example:** Navigate to `http://localhost:3000`
-
-### `browser-reload`
-
-Reload the current page and refresh console logs.
-
-**No parameters required**
-
-**Use case:** Refresh the page after code changes or to clear current state
-
-### `browser-console`
-
-Retrieve all console messages (logs, errors, warnings) from the current page.
-
-**No parameters required**
-
-**Returns:** All console output captured since navigation
-
-### `inspect-elements`
-
-Get detailed information about DOM elements including styles, position,
-visibility, and attributes.
-
-**Parameters:**
-
-- `selector` (string): CSS selector to query elements (e.g. ".button",
-  "#header", "div[data-test]")
-
-**Returns:** JSON with element details including:
-
-- Tag name, ID, class names
-- All HTML attributes
-- Position and dimensions
-- Computed styles (colors, fonts, display, etc.)
-- Visibility status
-
-### `extract-html`
-
-Extract raw HTML markup of elements for testing or analysis (similar to React
-Testing Library queries).
-
-**Parameters:**
-
-- `selector` (string): CSS selector to extract HTML from (e.g. ".alert",
-  "[role=dialog]")
-
-**Returns:** Raw HTML markup of matching elements
+- **Live Browser Integration**: Uses Playwright with a persistent browser session
+- **Network Request Monitoring**: Capture and analyze HTTP requests/responses
+- **Real-time Console Monitoring**: Captures console logs, errors, and warnings as they happen
+- **DOM Inspection**: Deep analysis of elements including styles, positioning, and visibility
+- **HTML Extraction**: Raw markup extraction similar to React Testing Library queries
 
 ## Installation
 
@@ -91,31 +37,182 @@ Start the MCP server:
 bun start
 ```
 
-Or run with development monitoring:
+The server will start and wait for MCP client connections from your AI assistant.
 
-```bash
-bun run src/index.ts
+## Configuration
+
+Add this server to your AI assistant's MCP configuration:
+
+### Claude Code
+Add to your MCP settings:
+```json
+{
+  "mcpServers": {
+    "webdev": {
+      "command": "bun",
+      "args": ["start"],
+      "cwd": "/path/to/webdev-mcp"
+    }
+  }
+}
 ```
 
-## Development
-
-Type checking:
-
-```bash
-bun run typecheck
+### Cursor
+Add to your MCP configuration file:
+```json
+{
+  "webdev": {
+    "command": "bun",
+    "args": ["start"],
+    "cwd": "/path/to/webdev-mcp"
+  }
+}
 ```
 
-Format code:
+## Available Tools
 
-```bash
-bun run format
-```
+### Browser Navigation
 
-## Architecture
+#### `browser-navigate`
+Navigate the browser to a specific URL and start monitoring the page.
 
-- `src/index.ts` - Entry point with error handling and graceful shutdown
-- `src/server.ts` - MCP server setup and tool registration
-- `src/browser/BrowserManager.ts` - Singleton browser management with Playwright
-- `src/tools/` - Individual tool implementations
+**Parameters:**
+- `url` (string): The URL to navigate to
 
-Built with TypeScript, Playwright, and the MCP SDK.
+**Example use case:** Navigate to `http://localhost:3000` to debug your development server
+
+#### `browser-reload`
+Reload the current page and refresh console logs.
+
+**No parameters required**
+
+**Use case:** Refresh the page after code changes or to clear current state
+
+### Console Monitoring
+
+#### `browser-console`
+Retrieve all console messages (logs, errors, warnings) from the current page.
+
+**No parameters required**
+
+**Returns:** All console output captured since navigation, including:
+- Console logs (`console.log`, `console.info`)
+- Warnings (`console.warn`)
+- Errors (`console.error`)
+- JavaScript errors and exceptions
+
+### DOM Analysis
+
+#### `inspect-elements`
+Get detailed information about DOM elements including styles, position, visibility, and attributes.
+
+**Parameters:**
+- `selector` (string): CSS selector to query elements (e.g. `.button`, `#header`, `div[data-test]`)
+
+**Returns:** JSON with element details including:
+- Tag name, ID, class names
+- All HTML attributes
+- Position and dimensions (x, y, width, height)
+- Computed styles (colors, fonts, display, visibility, etc.)
+- Visibility status and accessibility properties
+
+**Example use cases:**
+- Debug CSS styling issues
+- Verify element positioning
+- Check if elements are visible to users
+- Analyze accessibility attributes
+
+#### `extract-html`
+Extract raw HTML markup of elements for testing or analysis (similar to React Testing Library queries).
+
+**Parameters:**
+- `selector` (string): CSS selector to extract HTML from (e.g. `.alert`, `[role=dialog]`)
+
+**Returns:** Raw HTML markup of matching elements
+
+**Example use cases:**
+- Extract component HTML for testing
+- Analyze rendered output
+- Debug template rendering issues
+
+### Network Request Monitoring
+
+#### `network-requests`
+List all network requests captured since page load with optional filtering.
+
+**Parameters:**
+- `filter` (string, optional): Filter requests by URL substring (e.g. `"api"`, `"/users"`)
+- `statusRange` (string, optional): Filter by HTTP status code range (e.g. `"400-499"`, `"500-599"`) or single status (e.g. `"404"`)
+
+**Returns:** JSON list of network requests with:
+- Request ID, method, URL
+- HTTP status code and status text
+- Response size and duration
+- Timestamp
+
+**Example use cases:**
+- Debug API integration issues
+- Monitor failed requests (4xx, 5xx status codes)
+- Analyze page load performance
+- Verify API calls are being made correctly
+
+#### `network-inspect`
+Get detailed information about a specific network request including headers, body, and response data.
+
+**Parameters:**
+- `id` (string, optional): Request ID from `network-requests` output
+- `urlPattern` (string, optional): URL pattern to find the most recent matching request
+
+**Returns:** Detailed request/response information including:
+- Request and response headers
+- Request and response body (parsed JSON when possible)
+- HTTP status and timing information
+- Error details for failed requests
+
+**Example use cases:**
+- Debug API request/response data
+- Analyze request headers and authentication
+- Inspect response payloads
+- Troubleshoot failed network requests
+
+#### `network-clear`
+Clear the network request buffer to start fresh monitoring.
+
+**No parameters required**
+
+**Use case:** Clear request history to focus on new requests after page changes
+
+## Common Use Cases
+
+### Debugging a Web Application
+1. Navigate to your app: `browser-navigate` → `http://localhost:3000`
+2. Check console for errors: `browser-console`
+3. Monitor API calls: `network-requests` with filter `"api"`
+4. Inspect failed requests: `network-inspect` with specific request ID
+5. Analyze UI elements: `inspect-elements` with CSS selector
+
+### Testing UI Components
+1. Navigate to component page
+2. Extract component HTML: `extract-html` with component selector
+3. Inspect element properties: `inspect-elements` for styling verification
+4. Check console for warnings: `browser-console`
+
+### API Integration Analysis
+1. Navigate to page that makes API calls
+2. Monitor all requests: `network-requests`
+3. Filter for specific API endpoints: `network-requests` with URL filter
+4. Inspect request/response details: `network-inspect`
+5. Clear history and test again: `network-clear`
+
+## Requirements
+
+- [Bun](https://bun.sh/) runtime
+- Node.js compatible environment
+- AI assistant with MCP support (Claude Code, Cursor, etc.)
+
+## Browser Behavior
+
+- Uses Playwright with Chromium in headless mode
+- Maintains a single persistent browser session
+- Automatically captures console logs and network requests
+- Browser state persists between tool calls until restart
