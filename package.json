@@ -1,5 +1,22 @@
 {
   "name": "web-developer-mcp",
+  "description": "A Model Context Protocol (MCP) server that provides web development tools for AI assistants. Enables browser automation, DOM inspection, network monitoring, and console analysis through Playwright.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "web-development",
+    "browser-automation",
+    "playwright",
+    "ai-assistant",
+    "claude",
+    "cursor",
+    "dom-inspection",
+    "network-monitoring",
+    "console-logs",
+    "debugging",
+    "testing",
+    "web-scraping"
+  ],
   "author": "Christoffer Artmann <artgaard@gmail.com>",
   "version": "1.4.0",
   "repository": {
