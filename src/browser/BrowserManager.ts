@@ -48,12 +48,14 @@ export class BrowserManager {
     try {
       console.error('Launching browser...')
 
+      const isHeadless = process.env.HEADLESS === 'true'
+
       this.browser = await chromium.launch({
-        headless: false,
+        headless: isHeadless,
         timeout: 5_000
       })
 
-      console.error('Browser launched successfully')
+      console.error(`Browser launched successfully (headless: ${isHeadless})`)
     } catch (error) {
       console.error('Error launching browser:', error)
       throw error

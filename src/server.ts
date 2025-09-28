@@ -87,8 +87,11 @@ export class Server {
 
   async start() {
     console.error('Starting MCP server...')
+
     const transport = new StdioServerTransport()
+    
     await this.mcpServer.connect(transport)
+    
     console.error('MCP server connected')
   }
 }
