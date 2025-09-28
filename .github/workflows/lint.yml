@@ -1,0 +1,41 @@
+name: Lint & Format
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check code formatting
+        run: |
+          bun run format --check
+          if [ $? -ne 0 ]; then
+            echo "❌ Code formatting issues found"
+            echo "Please run 'bun run format' to fix formatting"
+            exit 1
+          else
+            echo "✅ Code formatting is correct"
+          fi
+
+      - name: Run TypeScript type checking
+        run: |
+          echo "🔍 Running TypeScript type checking..."
+          bun run typecheck
+          echo "✅ Type checking passed"
