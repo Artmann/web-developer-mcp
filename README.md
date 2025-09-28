@@ -1,5 +1,6 @@
 # Web Developer MCP Server
 
+![NPM Version](https://img.shields.io/npm/v/web-developer-mcp)
 [![CI](https://github.com/Artmann/web-developer-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Artmann/web-developer-mcp/actions/workflows/ci.yml)
 [![Lint & Format](https://github.com/Artmann/web-developer-mcp/actions/workflows/lint.yml/badge.svg)](https://github.com/Artmann/web-developer-mcp/actions/workflows/lint.yml)
 [![Cross-Platform Tests](https://github.com/Artmann/web-developer-mcp/actions/workflows/cross-platform.yml/badge.svg)](https://github.com/Artmann/web-developer-mcp/actions/workflows/cross-platform.yml)
@@ -43,7 +44,7 @@ with these tasks.
 ### From npm (Recommended)
 
 ```bash
-npx web-developer-mcp
+npx -y web-developer-mcp
 ```
 
 ### From Source
@@ -71,30 +72,26 @@ Add this server to your AI assistant's MCP configuration:
 
 ### Claude Code
 
-Add to your MCP settings:
+Add this server using the Claude Code CLI:
 
-```json
-{
-  "mcpServers": {
-    "webdev": {
-      "command": "bun",
-      "args": ["start"],
-      "cwd": "/path/to/web-developer-mcp"
-    }
-  }
-}
+```bash
+claude mcp add -s user web-developer-mcp npx -y web-developer-mcp
 ```
 
 ### Cursor
 
-Add to your MCP configuration file:
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-developer-mcp&config=eyJjb21tYW5kIjoibnB4IC15IHdlYi1kZXZlbG9wZXItbWNwIn0%3D)
+
+Or manually add to your MCP configuration file:
 
 ```json
 {
-  "webdev": {
-    "command": "bun",
-    "args": ["start"],
-    "cwd": "/path/to/web-developer-mcp"
+  "web-developer-mcp": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "web-developer-mcp"
+    ]
   }
 }
 ```
