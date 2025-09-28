@@ -1,6 +1,8 @@
 # Contributing to WebDev MCP Server
 
-Thank you for your interest in contributing to the WebDev MCP Server! This document provides guidelines for developers who want to modify, extend, or contribute to the project.
+Thank you for your interest in contributing to the WebDev MCP Server! This
+document provides guidelines for developers who want to modify, extend, or
+contribute to the project.
 
 ## Development Setup
 
@@ -55,15 +57,21 @@ src/
 ### Design Patterns
 
 #### Browser Management
+
 - **Singleton Pattern**: `BrowserManager` maintains a single browser instance
 - **Single Page Model**: Replaces page on navigation rather than multiple tabs
-- **Automatic Monitoring**: Captures console logs and network requests automatically
-- **Graceful Shutdown**: Handles SIGINT/SIGTERM signals for clean browser closure
+- **Automatic Monitoring**: Captures console logs and network requests
+  automatically
+- **Graceful Shutdown**: Handles SIGINT/SIGTERM signals for clean browser
+  closure
 
 #### Tool Architecture
+
 - **Modular Design**: Each tool is a separate module with focused responsibility
-- **Consistent Interface**: All tools export a handler function with standardized return type
-- **Error Handling**: Comprehensive error handling with descriptive user messages
+- **Consistent Interface**: All tools export a handler function with
+  standardized return type
+- **Error Handling**: Comprehensive error handling with descriptive user
+  messages
 - **Parameter Validation**: Input validation with helpful error messages
 
 ## Code Style Guidelines
@@ -72,22 +80,28 @@ src/
 
 - **Strict Type Checking**: Use TypeScript with strict mode enabled
 - **Explicit Typing**: Prefer explicit types over `any`
-- **Interface Organization**: Sort object properties and interface fields alphabetically
-- **Literal Types**: Use `as const` for literal types to ensure proper MCP content typing
+- **Interface Organization**: Sort object properties and interface fields
+  alphabetically
+- **Literal Types**: Use `as const` for literal types to ensure proper MCP
+  content typing
 
 ### Code Organization
 
 - **Early Returns**: Use early returns to reduce nesting
 - **Logical Separation**: Add blank lines between methods and logical sections
-- **Alphabetical Sorting**: Sort imports, object properties, and interface fields alphabetically
-- **Focused Functions**: Keep functions small and focused on single responsibilities
+- **Alphabetical Sorting**: Sort imports, object properties, and interface
+  fields alphabetically
+- **Focused Functions**: Keep functions small and focused on single
+  responsibilities
 
 ### Browser Context Guidelines
 
-- **Browser Globals**: Use `globalThis as any` for browser globals in Playwright evaluation contexts
+- **Browser Globals**: Use `globalThis as any` for browser globals in Playwright
+  evaluation contexts
 - **Simple Evaluations**: Keep `page.$$eval()` functions simple and focused
 - **Type Safety**: Type DOM elements carefully to avoid TypeScript errors
-- **Context Awareness**: Remember that evaluation functions run in browser context, not Node.js
+- **Context Awareness**: Remember that evaluation functions run in browser
+  context, not Node.js
 
 ## MCP Integration Standards
 
@@ -111,6 +125,7 @@ return {
 ### Tool Registration
 
 Tools must be registered in `src/server.ts` with:
+
 - Clear, descriptive names
 - Comprehensive descriptions
 - Proper input schema with Zod validation
@@ -120,7 +135,8 @@ Tools must be registered in `src/server.ts` with:
 
 ### Step-by-Step Process
 
-1. **Create Tool File**: Add new file in `src/tools/` following naming convention
+1. **Create Tool File**: Add new file in `src/tools/` following naming
+   convention
 2. **Implement Handler**: Export async handler function with proper typing
 3. **Add Error Handling**: Include comprehensive error handling and validation
 4. **Register Tool**: Add to `src/server.ts` with proper schema and descriptions
@@ -176,7 +192,10 @@ this.mcpServer.registerTool(
     description: 'Clear description of what the tool does and when to use it',
     inputSchema: {
       param1: z.string().describe('Description of required parameter'),
-      param2: z.number().optional().describe('Description of optional parameter')
+      param2: z
+        .number()
+        .optional()
+        .describe('Description of optional parameter')
     }
   },
   myToolHandler
@@ -255,6 +274,8 @@ bun test src/tools/my-tool.test.ts
 3. **Format Code**: Run `bun run format` to ensure consistent formatting
 4. **Update Documentation**: Update README.md if adding/changing tools
 5. **Manual Testing**: Test the MCP server with real AI assistant integration
+6. **CI Checks**: Ensure all GitHub Actions workflows will pass (they run
+   automatically on PR)
 
 ## Browser Management Details
 
@@ -286,6 +307,7 @@ const requests = browserManager.getNetworkRequests()
 ### Network Request Monitoring
 
 The browser automatically captures:
+
 - All HTTP/HTTPS requests
 - Request/response headers
 - Request/response bodies
@@ -341,11 +363,52 @@ const result = await page.evaluate(() => {
 - **Issues**: Check existing issues for similar problems
 - **Code Review**: Look at existing tools for patterns and examples
 - **Testing**: Use the test suite as examples for writing new tests
-- **Architecture**: Reference this document and the CLAUDE.md file for guidelines
+- **Architecture**: Reference this document and the CLAUDE.md file for
+  guidelines
+
+## CI/CD Workflows
+
+The project uses GitHub Actions for automated testing and quality assurance:
+
+### Workflow Overview
+
+- **`ci.yml`**: Main CI pipeline that runs on every push and PR
+  - Runs TypeScript type checking
+  - Executes full test suite with Playwright
+  - Checks code formatting
+
+- **`lint.yml`**: Code quality checks
+  - Verifies code formatting with Prettier
+  - Runs TypeScript type checking
+
+- **`cross-platform.yml`**: Multi-OS compatibility testing
+  - Tests on Ubuntu, Windows, and macOS
+  - Ensures cross-platform functionality
+
+- **`release.yml`**: Automated release creation
+  - Triggers on version tags (e.g., `v1.0.0`)
+  - Runs full test suite before release
+  - Creates GitHub releases with changelog
+
+### Local CI Simulation
+
+Run the same checks locally before pushing:
+
+```bash
+# Run the full CI pipeline locally
+bun run typecheck  # Type checking
+bun run test       # Test suite
+bun run format     # Code formatting
+```
+
+### Workflow Status
+
+Check workflow status badges in the README to see current build health.
 
 ## Performance Considerations
 
 - **Browser Resource Usage**: Monitor memory usage during long sessions
 - **Network Request Storage**: Large numbers of requests may consume memory
 - **Page Evaluation**: Keep browser evaluation functions lightweight
-- **Concurrent Usage**: Design for single AI assistant usage, not concurrent access
+- **Concurrent Usage**: Design for single AI assistant usage, not concurrent
+  access

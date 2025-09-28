@@ -16,13 +16,13 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.18.1",
+    "@modelcontextprotocol/sdk": "^1.18.2",
     "playwright": "^1.55.1"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^22.10.2",
-    "@vitest/ui": "^2.1.8",
+    "@types/node": "^22.18.6",
+    "@vitest/ui": "^2.1.9",
     "prettier": "^3.6.2",
     "vitest": "^3.2.4"
   }
