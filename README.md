@@ -1,8 +1,8 @@
-# WebDev MCP Server
+# Web Developer MCP Server
 
-[![CI](https://github.com/artmann/webdev-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/artmann/webdev-mcp/actions/workflows/ci.yml)
-[![Lint & Format](https://github.com/artmann/webdev-mcp/actions/workflows/lint.yml/badge.svg)](https://github.com/artmann/webdev-mcp/actions/workflows/lint.yml)
-[![Cross-Platform Tests](https://github.com/artmann/webdev-mcp/actions/workflows/cross-platform.yml/badge.svg)](https://github.com/artmann/webdev-mcp/actions/workflows/cross-platform.yml)
+[![CI](https://github.com/Artmann/web-developer-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Artmann/web-developer-mcp/actions/workflows/ci.yml)
+[![Lint & Format](https://github.com/Artmann/web-developer-mcp/actions/workflows/lint.yml/badge.svg)](https://github.com/Artmann/web-developer-mcp/actions/workflows/lint.yml)
+[![Cross-Platform Tests](https://github.com/Artmann/web-developer-mcp/actions/workflows/cross-platform.yml/badge.svg)](https://github.com/Artmann/web-developer-mcp/actions/workflows/cross-platform.yml)
 
 A Model Context Protocol (MCP) server that provides web development tools for
 coding AI assistants like **Claude Code**, **Cursor**, and other AI-powered
@@ -40,7 +40,17 @@ with these tasks.
 
 ## Installation
 
+### From npm (Recommended)
+
 ```bash
+npx web-developer-mcp
+```
+
+### From Source
+
+```bash
+git clone https://github.com/Artmann/web-developer-mcp.git
+cd web-developer-mcp
 bun install
 ```
 
@@ -69,7 +79,7 @@ Add to your MCP settings:
     "webdev": {
       "command": "bun",
       "args": ["start"],
-      "cwd": "/path/to/webdev-mcp"
+      "cwd": "/path/to/web-developer-mcp"
     }
   }
 }
@@ -84,7 +94,7 @@ Add to your MCP configuration file:
   "webdev": {
     "command": "bun",
     "args": ["start"],
-    "cwd": "/path/to/webdev-mcp"
+    "cwd": "/path/to/web-developer-mcp"
   }
 }
 ```

@@ -57,7 +57,7 @@ jobs:
             ### Installation
             ```bash
             git clone https://github.com/${{ github.repository }}.git
-            cd webdev-mcp
+            cd web-developer-mcp
             bun install
             bun start
             ```

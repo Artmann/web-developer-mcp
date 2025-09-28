@@ -1,12 +1,20 @@
 {
-  "name": "webdev-mcp",
+  "name": "web-developer-mcp",
   "author": "Christoffer Artmann <artgaard@gmail.com>",
   "version": "1.2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Artmann/web-developer-mcp.git"
+  },
+  "homepage": "https://github.com/Artmann/web-developer-mcp",
+  "bugs": {
+    "url": "https://github.com/Artmann/web-developer-mcp/issues"
+  },
   "main": "dist/index.js",
   "module": "src/index.ts",
   "type": "module",
   "bin": {
-    "webdev-mcp": "dist/index.js"
+    "web-developer-mcp": "dist/index.js"
   },
   "files": [
     "dist",

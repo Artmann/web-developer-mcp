@@ -16,7 +16,7 @@ export class Server {
 
   constructor() {
     this.mcpServer = new McpServer({
-      name: 'webdev-mcp',
+      name: 'web-developer-mcp',
       version: '1.0.0'
     })
     this.registerTools()
