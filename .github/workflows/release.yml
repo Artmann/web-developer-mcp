@@ -9,6 +9,8 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -39,12 +41,10 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          name: Release ${{ steps.get_version.outputs.VERSION }}
           body: |
             ## Changes in ${{ steps.get_version.outputs.VERSION }}
 
@@ -56,6 +56,10 @@ jobs:
 
             ### Installation
             ```bash
+            # From npm (recommended)
+            npx web-developer-mcp
+
+            # From source
             git clone https://github.com/${{ github.repository }}.git
             cd web-developer-mcp
             bun install
@@ -63,8 +67,7 @@ jobs:
             ```
 
             ### Requirements
-            - Bun runtime
-            - Node.js compatible environment
+            - Node.js 18+ or Bun runtime
             - AI assistant with MCP support (Claude Code, Cursor, etc.)
           draft: false
           prerelease: false
