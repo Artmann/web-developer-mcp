@@ -48,7 +48,9 @@ describe('browser-navigate tool', () => {
       content: [
         {
           type: 'text',
-          text: expect.stringContaining('Failed to navigate to not-a-valid-url:')
+          text: expect.stringContaining(
+            'Failed to navigate to not-a-valid-url:'
+          )
         }
       ],
       isError: true

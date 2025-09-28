@@ -192,7 +192,9 @@ describe('inspect-elements tool', () => {
       content: [
         {
           type: 'text',
-          text: expect.stringContaining("Failed to query DOM elements with selector '###invalid':")
+          text: expect.stringContaining(
+            "Failed to query DOM elements with selector '###invalid':"
+          )
         }
       ],
       isError: true

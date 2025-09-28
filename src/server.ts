@@ -7,6 +7,9 @@ import { reloadHandler } from './tools/reload'
 import { consoleHandler } from './tools/console'
 import { queryDomHandler } from './tools/query-dom'
 import { queryHtmlHandler } from './tools/query-html'
+import { networkRequestsHandler } from './tools/network-requests'
+import { networkInspectHandler } from './tools/network-inspect'
+import { networkClearHandler } from './tools/network-clear'
 
 export class Server {
   private mcpServer: McpServer
@@ -83,15 +86,69 @@ export class Server {
       },
       queryHtmlHandler
     )
+
+    this.mcpServer.registerTool(
+      'network-requests',
+      {
+        title: 'List Network Requests',
+        description:
+          'List all network requests captured since page load with optional filtering by URL or status codes',
+        inputSchema: {
+          filter: z
+            .string()
+            .optional()
+            .describe(
+              'Filter requests by URL substring (e.g. "api", "/users")'
+            ),
+          statusRange: z
+            .string()
+            .optional()
+            .describe(
+              'Filter by HTTP status code range (e.g. "400-499", "500-599") or single status (e.g. "404")'
+            )
+        }
+      },
+      networkRequestsHandler
+    )
+
+    this.mcpServer.registerTool(
+      'network-inspect',
+      {
+        title: 'Inspect Network Request',
+        description:
+          'Get detailed information about a specific network request including headers, body, and response data',
+        inputSchema: {
+          id: z
+            .string()
+            .optional()
+            .describe('Request ID from network-requests output'),
+          urlPattern: z
+            .string()
+            .optional()
+            .describe('URL pattern to find the most recent matching request')
+        }
+      },
+      networkInspectHandler
+    )
+
+    this.mcpServer.registerTool(
+      'network-clear',
+      {
+        title: 'Clear Network Requests',
+        description:
+          'Clear the network request buffer to start fresh monitoring'
+      },
+      networkClearHandler
+    )
   }
 
   async start() {
     console.error('Starting MCP server...')
 
     const transport = new StdioServerTransport()
-    
+
     await this.mcpServer.connect(transport)
-    
+
     console.error('MCP server connected')
   }
 }

@@ -223,7 +223,9 @@ describe('extract-html tool', () => {
       content: [
         {
           type: 'text',
-          text: expect.stringContaining("Failed to extract HTML with selector '###invalid':")
+          text: expect.stringContaining(
+            "Failed to extract HTML with selector '###invalid':"
+          )
         }
       ],
       isError: true

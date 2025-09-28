@@ -26,7 +26,10 @@ export class MCPTestClient {
     await this.client.connect(this.transport)
   }
 
-  async callTool(name: string, arguments_: Record<string, any> = {}): Promise<any> {
+  async callTool(
+    name: string,
+    arguments_: Record<string, any> = {}
+  ): Promise<any> {
     if (!this.client) {
       throw new Error('Client not connected. Call connect() first.')
     }
