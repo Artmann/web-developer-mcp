@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 import { MCPTestClient } from '../testing/mcp-test-client'
+import { waitFor } from '../utils/wait-for'
 
 describe('network-inspect tool', () => {
   let client: MCPTestClient
@@ -126,7 +127,7 @@ describe('network-inspect tool', () => {
     })
 
     // Wait for request to complete
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Get requests to find an ID
     const requestsResult = await client.callTool('network-requests')
@@ -204,7 +205,7 @@ describe('network-inspect tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const result = await client.callTool('network-inspect', {
       urlPattern: 'text/plain'
@@ -277,7 +278,7 @@ describe('network-inspect tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const result = await client.callTool('network-inspect', {
       urlPattern: 'application/json'
@@ -351,7 +352,7 @@ describe('network-inspect tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const result = await client.callTool('network-inspect', {
       urlPattern: 'invalid-type'

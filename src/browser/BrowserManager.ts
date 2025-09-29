@@ -7,6 +7,8 @@ import {
   type Response
 } from 'playwright'
 
+import { waitFor } from '../utils/wait-for'
+
 export interface NetworkRequest {
   id: string
   method: string
@@ -81,7 +83,7 @@ export class BrowserManager {
           `Navigation wait timeout reached after ${timeoutInMilliseconds}ms`
         )
       }
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await waitFor(100)
     }
   }
 
@@ -216,7 +218,7 @@ export class BrowserManager {
       await this.page.goto(url, { waitUntil: 'networkidle' })
 
       // Wait additional time for JavaScript execution and console logs
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await waitFor(1000)
     } finally {
       this.isNavigating = false
     }

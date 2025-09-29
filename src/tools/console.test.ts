@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 import { MCPTestClient } from '../testing/mcp-test-client'
+import { waitFor } from '../utils/wait-for'
 
 describe('browser-console tool', () => {
   let client: MCPTestClient
@@ -54,7 +55,7 @@ describe('browser-console tool', () => {
     expect(navigateResult.content[0].text).toContain('Successfully navigated')
 
     // Wait a moment for console logs to be captured
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Get console logs
     const result = await client.callTool('browser-console')
@@ -90,7 +91,7 @@ describe('browser-console tool', () => {
     })
 
     // Wait a moment for console logs to be captured
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Get console logs
     const result = await client.callTool('browser-console')
@@ -120,7 +121,7 @@ describe('browser-console tool', () => {
     })
 
     // Wait a moment
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Get console logs
     const result = await client.callTool('browser-console')
@@ -227,7 +228,7 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlWithLogs).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Verify we have logs
     const firstResult = await client.callTool('browser-console')
@@ -238,7 +239,7 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(emptyHtml).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Console should be cleared
     const secondResult = await client.callTool('browser-console')
