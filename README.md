@@ -88,10 +88,7 @@ Or manually add to your MCP configuration file:
 {
   "web-developer-mcp": {
     "command": "npx",
-    "args": [
-      "-y",
-      "web-developer-mcp"
-    ]
+    "args": ["-y", "web-developer-mcp"]
   }
 }
 ```

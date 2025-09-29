@@ -10,6 +10,6 @@ export default defineConfig({
   clean: true,
   shims: true,
   banner: {
-    js: '#!/usr/bin/env node',
-  },
+    js: '#!/usr/bin/env node'
+  }
 })

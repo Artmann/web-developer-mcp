@@ -133,6 +133,62 @@ describe('browser-console tool', () => {
     ])
   })
 
+  it('should capture delayed console logs from asynchronous JavaScript', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Delayed Console Logs Test</title>
+</head>
+<body>
+    <h1>Delayed Console Logs Test</h1>
+    <p>This page logs messages after a 200ms delay.</p>
+
+    <script>
+        console.log('Immediate log message');
+
+        // Log after 200ms delay
+        setTimeout(() => {
+            console.log('Delayed log message after 200ms');
+            console.warn('Delayed warning message');
+        }, 200);
+
+        // Log after 100ms delay
+        setTimeout(() => {
+            console.info('Delayed info message after 100ms');
+        }, 100);
+    </script>
+</body>
+</html>`
+
+    // Navigate to page with delayed console logs
+    const navigateResult = await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    expect(navigateResult).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: expect.any(String)
+        }
+      ]
+    })
+
+    // Get console logs - our navigation state management should handle the waiting
+    const result = await client.callTool('browser-console')
+
+    // Verify all messages are captured, including delayed ones
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Immediate log message\n[info] Delayed info message after 100ms\n[log] Delayed log message after 200ms\n[warning] Delayed warning message'
+        }
+      ]
+    })
+  })
+
   it('should clear console logs when navigating to a new page', async () => {
     const htmlWithLogs = `<!DOCTYPE html>
 <html lang="en">

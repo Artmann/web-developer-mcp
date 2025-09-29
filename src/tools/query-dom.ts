@@ -31,6 +31,10 @@ interface DOMElement {
 export async function queryDomHandler({ selector }: { selector: string }) {
   try {
     const browserManager = BrowserManager.getInstance()
+
+    // Wait for any ongoing navigation to complete
+    await browserManager.waitForNavigationComplete()
+
     const page = browserManager.getPage()
 
     if (!page) {

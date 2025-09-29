@@ -150,24 +150,151 @@ describe('browser-reload tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlWithLogs).toString('base64')}`
     })
 
-    // Wait for logs
-    await new Promise((resolve) => setTimeout(resolve, 200))
-
     // Check initial logs
     const beforeReload = await client.callTool('browser-console')
-    expect(beforeReload.content[0].text).toContain('Initial load')
-    expect(beforeReload.content[0].text).toContain('Delayed log')
+    expect(beforeReload).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Initial load\n[log] Delayed log'
+        }
+      ]
+    })
 
     // Reload the page
     await client.callTool('browser-reload')
 
-    // Wait for new logs
-    await new Promise((resolve) => setTimeout(resolve, 200))
-
     // After reload, we should have fresh logs
     const afterReload = await client.callTool('browser-console')
-    expect(afterReload.content[0].text).toContain('Initial load')
-    expect(afterReload.content[0].text).toContain('Delayed log')
-    // The logs should be new instances, not accumulated from before
+    expect(afterReload).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Initial load\n[log] Delayed log'
+        }
+      ]
+    })
+  })
+
+  it('should properly manage navigation state during reload with delayed content', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reload Navigation State Test</title>
+</head>
+<body>
+    <div id="static-content">
+        <h1>Static content</h1>
+    </div>
+    <div id="dynamic-content"></div>
+
+    <script>
+        console.log('Page loading');
+
+        // Add content immediately
+        const immediateElement = document.createElement('p');
+        immediateElement.textContent = 'Immediate element';
+        immediateElement.className = 'immediate';
+        document.getElementById('dynamic-content').appendChild(immediateElement);
+
+        // Add content after 160ms
+        setTimeout(() => {
+            const delayedElement = document.createElement('p');
+            delayedElement.textContent = 'Delayed element after 160ms';
+            delayedElement.className = 'delayed-160';
+            delayedElement.id = 'delayed-paragraph';
+            document.getElementById('dynamic-content').appendChild(delayedElement);
+
+            console.log('Delayed content added');
+        }, 160);
+
+        // Add content after 240ms
+        setTimeout(() => {
+            const veryDelayedElement = document.createElement('span');
+            veryDelayedElement.textContent = 'Very delayed span after 240ms';
+            veryDelayedElement.className = 'very-delayed-240';
+            veryDelayedElement.id = 'very-delayed-span';
+            document.getElementById('dynamic-content').appendChild(veryDelayedElement);
+
+            console.log('Very delayed content added');
+        }, 240);
+    </script>
+</body>
+</html>`
+
+    // Navigate to page initially
+    const navigateResult = await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    expect(navigateResult).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: expect.any(String)
+        }
+      ]
+    })
+
+    // Verify initial dynamic content is present
+    const initialDomQuery = await client.callTool('inspect-elements', {
+      selector: '#dynamic-content p, #dynamic-content span'
+    })
+
+    const initialParsed = JSON.parse(initialDomQuery.content[0].text)
+    expect(initialParsed.count).toBe(3)
+
+    // Reload the page
+    const reloadResult = await client.callTool('browser-reload')
+    expect(reloadResult).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: 'Page reloaded successfully'
+        }
+      ]
+    })
+
+    // After reload, verify the same dynamic content is recreated
+    const afterReloadDomQuery = await client.callTool('inspect-elements', {
+      selector: '#dynamic-content p, #dynamic-content span'
+    })
+
+    const afterReloadParsed = JSON.parse(afterReloadDomQuery.content[0].text)
+    expect(afterReloadParsed).toEqual({
+      selector: '#dynamic-content p, #dynamic-content span',
+      count: 3,
+      elements: expect.arrayContaining([
+        expect.objectContaining({
+          tagName: 'p',
+          className: 'immediate',
+          textContent: 'Immediate element'
+        }),
+        expect.objectContaining({
+          tagName: 'p',
+          className: 'delayed-160',
+          id: 'delayed-paragraph',
+          textContent: 'Delayed element after 160ms'
+        }),
+        expect.objectContaining({
+          tagName: 'span',
+          className: 'very-delayed-240',
+          id: 'very-delayed-span',
+          textContent: 'Very delayed span after 240ms'
+        })
+      ])
+    })
+
+    // Verify console logs are also properly captured after reload
+    const consoleResult = await client.callTool('browser-console')
+    expect(consoleResult).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Page loading\n[log] Delayed content added\n[log] Very delayed content added'
+        }
+      ]
+    })
   })
 })
