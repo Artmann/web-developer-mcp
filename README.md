@@ -41,11 +41,7 @@ with these tasks.
 
 ## Installation
 
-### From npm (Recommended)
-
-```bash
-npx -y web-developer-mcp
-```
+Add this server to your AI assistant's MCP configuration (see [Configuration](#configuration) section below for specific setup instructions).
 
 ### From Source
 
@@ -70,14 +66,6 @@ assistant.
 
 Add this server to your AI assistant's MCP configuration:
 
-### Claude Code
-
-Add this server using the Claude Code CLI:
-
-```bash
-claude mcp add -s user web-developer-mcp npx -y web-developer-mcp
-```
-
 ### Cursor
 
 [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-developer-mcp&config=eyJjb21tYW5kIjoibnB4IC15IHdlYi1kZXZlbG9wZXItbWNwIn0%3D)
@@ -88,9 +76,17 @@ Or manually add to your MCP configuration file:
 {
   "web-developer-mcp": {
     "command": "npx",
-    "args": ["-y", "web-developer-mcp"]
+    "args": ["web-developer-mcp"]
   }
 }
+```
+
+### Claude Code
+
+Add this server using the Claude Code CLI:
+
+```bash
+claude mcp add -s user web-developer-mcp npx web-developer-mcp
 ```
 
 ## Available Tools
