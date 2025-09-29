@@ -1,5 +1,6 @@
 import { BrowserManager } from '../browser/BrowserManager'
 import { createSuccessResponse, createErrorResponse } from '../response'
+import { waitFor } from '../utils/wait-for'
 
 export async function consoleHandler() {
   try {
@@ -9,7 +10,7 @@ export async function consoleHandler() {
     await browserManager.waitForNavigationComplete()
 
     // Give JavaScript additional time to execute and generate logs
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const consoleLogs = browserManager.getConsoleLogs()
 

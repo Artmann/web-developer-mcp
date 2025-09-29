@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 import { MCPTestClient } from '../testing/mcp-test-client'
+import { waitFor } from '../utils/wait-for'
 
 describe('network-clear tool', () => {
   let client: MCPTestClient
@@ -55,7 +56,7 @@ describe('network-clear tool', () => {
     })
 
     // Wait for all resources to load
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await waitFor(500)
 
     // Clear the requests - we expect at least the base page request
     const clearResult = await client.callTool('network-clear')

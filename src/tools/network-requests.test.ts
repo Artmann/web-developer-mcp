@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 import { MCPTestClient } from '../testing/mcp-test-client'
+import { waitFor } from '../utils/wait-for'
 
 describe('network-requests tool', () => {
   let client: MCPTestClient
@@ -43,7 +44,7 @@ describe('network-requests tool', () => {
     })
 
     // Wait a moment for potential requests
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await waitFor(500)
 
     const result = await client.callTool('network-requests')
 
@@ -76,7 +77,7 @@ describe('network-requests tool', () => {
     })
 
     // Wait for network requests to complete
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const result = await client.callTool('network-requests')
 
@@ -121,7 +122,7 @@ describe('network-requests tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const result = await client.callTool('network-requests', {
       filter: 'application/json'
@@ -185,7 +186,7 @@ describe('network-requests tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     // Filter for successful requests (200 range)
     const result = await client.callTool('network-requests', {
@@ -246,7 +247,7 @@ describe('network-requests tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await waitFor(1000)
 
     const result = await client.callTool('network-requests', {
       statusRange: '200'

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 import { MCPTestClient } from '../testing/mcp-test-client'
+import { waitFor } from '../utils/wait-for'
 
 describe('browser-reload tool', () => {
   let client: MCPTestClient
@@ -49,7 +50,7 @@ describe('browser-reload tool', () => {
     })
 
     // Wait for initial page to load
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await waitFor(500)
 
     // Get initial console logs
     const initialConsole = await client.callTool('browser-console')
@@ -68,7 +69,7 @@ describe('browser-reload tool', () => {
     })
 
     // Wait for reload to complete
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await waitFor(500)
 
     // Console should have new log entry after reload
     const reloadedConsole = await client.callTool('browser-console')
