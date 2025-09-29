@@ -30,6 +30,7 @@ export class BrowserManager {
   private consoleBuffer: string[] = []
   private networkRequests: NetworkRequest[] = []
   private requestIdCounter: number = 0
+  private isNavigating: boolean = false
 
   private constructor() {}
 
@@ -51,6 +52,7 @@ export class BrowserManager {
     this.page = null
     this.consoleBuffer = []
     this.networkRequests = []
+    this.isNavigating = false
   }
 
   getConsoleLogs(): string[] {
@@ -63,6 +65,24 @@ export class BrowserManager {
 
   getNetworkRequests(): NetworkRequest[] {
     return this.networkRequests
+  }
+
+  isNavigationInProgress(): boolean {
+    return this.isNavigating
+  }
+
+  async waitForNavigationComplete(
+    timeoutInMilliseconds: number = 10_000
+  ): Promise<void> {
+    const startTime = Date.now()
+    while (this.isNavigating) {
+      if (Date.now() - startTime > timeoutInMilliseconds) {
+        throw new Error(
+          `Navigation wait timeout reached after ${timeoutInMilliseconds}ms`
+        )
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
   }
 
   clearNetworkRequests(): void {
@@ -99,6 +119,7 @@ export class BrowserManager {
       await this.launch()
     }
 
+    this.isNavigating = true
     this.consoleBuffer = []
     this.networkRequests = []
     this.requestIdCounter = 0
@@ -191,6 +212,13 @@ export class BrowserManager {
       }
     })
 
-    await this.page.goto(url)
+    try {
+      await this.page.goto(url, { waitUntil: 'networkidle' })
+
+      // Wait additional time for JavaScript execution and console logs
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    } finally {
+      this.isNavigating = false
+    }
   }
 }

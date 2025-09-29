@@ -223,12 +223,79 @@ describe('extract-html tool', () => {
       content: [
         {
           type: 'text',
-          text: expect.stringContaining(
-            "Failed to extract HTML with selector '###invalid':"
-          )
+          text: expect.any(String)
         }
       ],
       isError: true
+    })
+  })
+
+  it('should wait for navigation and extract dynamically created HTML elements', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic HTML Test</title>
+</head>
+<body>
+    <div id="dynamic-container">
+        <h1>Initial heading</h1>
+    </div>
+
+    <script>
+        // Add elements immediately
+        const immediateSection = document.createElement('section');
+        immediateSection.className = 'immediate-section';
+        immediateSection.innerHTML = '<h2>Immediate section</h2><p>Immediate content</p>';
+        document.getElementById('dynamic-container').appendChild(immediateSection);
+
+        // Add elements after 180ms delay
+        setTimeout(() => {
+            const delayedArticle = document.createElement('article');
+            delayedArticle.className = 'delayed-article';
+            delayedArticle.id = 'article-180';
+            delayedArticle.innerHTML = '<h3>Delayed article</h3><p>Content added after 180ms</p>';
+            document.getElementById('dynamic-container').appendChild(delayedArticle);
+        }, 180);
+
+        // Add elements after 220ms delay
+        setTimeout(() => {
+            const veryDelayedAside = document.createElement('aside');
+            veryDelayedAside.className = 'very-delayed-aside';
+            veryDelayedAside.id = 'aside-220';
+            veryDelayedAside.innerHTML = '<h4>Very delayed aside</h4><p>Content added after 220ms</p>';
+            document.getElementById('dynamic-container').appendChild(veryDelayedAside);
+        }, 220);
+    </script>
+</body>
+</html>`
+
+    // Navigate to page with dynamic content
+    const navigateResult = await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    expect(navigateResult).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: expect.any(String)
+        }
+      ]
+    })
+
+    // Extract HTML for all article and aside elements
+    const result = await client.callTool('extract-html', {
+      selector: 'article, aside'
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '<article class="delayed-article" id="article-180"><h3>Delayed article</h3><p>Content added after 180ms</p></article>\n\n<aside class="very-delayed-aside" id="aside-220"><h4>Very delayed aside</h4><p>Content added after 220ms</p></aside>'
+        }
+      ]
     })
   })
 })

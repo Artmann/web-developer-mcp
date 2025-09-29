@@ -4,6 +4,13 @@ import { createSuccessResponse, createErrorResponse } from '../response'
 export async function consoleHandler() {
   try {
     const browserManager = BrowserManager.getInstance()
+
+    // Wait for any ongoing navigation to complete
+    await browserManager.waitForNavigationComplete()
+
+    // Give JavaScript additional time to execute and generate logs
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     const consoleLogs = browserManager.getConsoleLogs()
 
     const text =

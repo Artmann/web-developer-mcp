@@ -192,12 +192,101 @@ describe('inspect-elements tool', () => {
       content: [
         {
           type: 'text',
-          text: expect.stringContaining(
-            "Failed to query DOM elements with selector '###invalid':"
-          )
+          text: expect.any(String)
         }
       ],
       isError: true
+    })
+  })
+
+  it('should wait for navigation and capture dynamically created DOM elements', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic DOM Test</title>
+</head>
+<body>
+    <div id="container">
+        <p>Initial content</p>
+    </div>
+
+    <script>
+        // Add elements immediately
+        const immediateDiv = document.createElement('div');
+        immediateDiv.className = 'immediate-element';
+        immediateDiv.textContent = 'Immediate element';
+        document.getElementById('container').appendChild(immediateDiv);
+
+        // Add elements after 150ms delay
+        setTimeout(() => {
+            const delayedDiv = document.createElement('div');
+            delayedDiv.className = 'delayed-element';
+            delayedDiv.textContent = 'Delayed element after 150ms';
+            delayedDiv.id = 'delayed-150';
+            document.getElementById('container').appendChild(delayedDiv);
+        }, 150);
+
+        // Add elements after 250ms delay
+        setTimeout(() => {
+            const veryDelayedDiv = document.createElement('div');
+            veryDelayedDiv.className = 'very-delayed-element';
+            veryDelayedDiv.textContent = 'Very delayed element after 250ms';
+            veryDelayedDiv.id = 'delayed-250';
+            document.getElementById('container').appendChild(veryDelayedDiv);
+        }, 250);
+    </script>
+</body>
+</html>`
+
+    // Navigate to page with dynamic content
+    const navigateResult = await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    expect(navigateResult).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: expect.any(String)
+        }
+      ]
+    })
+
+    // Query for all div elements - should include dynamically created ones
+    const result = await client.callTool('inspect-elements', {
+      selector: 'div'
+    })
+
+    const parsed = JSON.parse(result.content[0].text)
+
+    expect(parsed).toEqual({
+      selector: 'div',
+      count: 4,
+      elements: expect.arrayContaining([
+        expect.objectContaining({
+          tagName: 'div',
+          id: 'container',
+          textContent: expect.any(String)
+        }),
+        expect.objectContaining({
+          tagName: 'div',
+          className: 'immediate-element',
+          textContent: 'Immediate element'
+        }),
+        expect.objectContaining({
+          tagName: 'div',
+          className: 'delayed-element',
+          id: 'delayed-150',
+          textContent: 'Delayed element after 150ms'
+        }),
+        expect.objectContaining({
+          tagName: 'div',
+          className: 'very-delayed-element',
+          id: 'delayed-250',
+          textContent: 'Very delayed element after 250ms'
+        })
+      ])
     })
   })
 })

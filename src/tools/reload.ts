@@ -12,7 +12,9 @@ export async function reloadHandler() {
       )
     }
 
-    await page.reload()
+    // Get the current URL to re-navigate to it with proper state management
+    const currentUrl = page.url()
+    await browserManager.navigate(currentUrl)
 
     return createSuccessResponse('Page reloaded successfully')
   } catch (error) {
