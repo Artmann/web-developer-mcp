@@ -1,8 +1,14 @@
-import { BrowserManager } from './browser/BrowserManager'
+import {
+  BrowserManager,
+  createBrowserConfigFromEnv
+} from './browser/BrowserManager'
 import { Server } from './server'
 
 async function main() {
   try {
+    const config = createBrowserConfigFromEnv()
+    const browserManager = BrowserManager.getInstance(config)
+
     const server = new Server()
 
     await server.start()

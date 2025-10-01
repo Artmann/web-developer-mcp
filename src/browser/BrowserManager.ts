@@ -1,13 +1,35 @@
 import {
   chromium,
   type Browser,
+  type BrowserContext,
   type Page,
   type ConsoleMessage,
   type Request,
   type Response
 } from 'playwright'
+import { homedir, platform } from 'os'
+import { join } from 'path'
+import invariant from 'tiny-invariant'
 
 import { waitFor } from '../utils/wait-for'
+
+export interface BrowserConfig {
+  browserType?: 'chrome' | 'chromium'
+  headless?: boolean
+  sessionType?: 'existing' | 'fresh'
+  userDataDir?: string
+}
+
+export function createBrowserConfigFromEnv(): BrowserConfig {
+  return {
+    browserType:
+      (process.env.BROWSER_TYPE as 'chrome' | 'chromium') ?? 'chrome',
+    headless: process.env.HEADLESS === 'true',
+    sessionType:
+      (process.env.SESSION_TYPE as 'existing' | 'fresh') ?? 'existing',
+    userDataDir: process.env.USER_DATA_DIR
+  }
+}
 
 export interface NetworkRequest {
   id: string
@@ -28,29 +50,39 @@ export interface NetworkRequest {
 export class BrowserManager {
   private static instance: BrowserManager | null = null
   private browser: Browser | null = null
+  private config: BrowserConfig
+  private context: BrowserContext | null = null
   private page: Page | null = null
   private consoleBuffer: string[] = []
   private networkRequests: NetworkRequest[] = []
   private requestIdCounter: number = 0
   private isNavigating: boolean = false
 
-  private constructor() {}
+  private constructor(config: BrowserConfig = {}) {
+    this.config = config
+  }
 
-  static getInstance(): BrowserManager {
+  static getInstance(config: BrowserConfig = {}): BrowserManager {
     if (!BrowserManager.instance) {
-      BrowserManager.instance = new BrowserManager()
+      BrowserManager.instance = new BrowserManager(config)
     }
 
     return BrowserManager.instance
   }
 
   async close(): Promise<void> {
-    if (!this.browser) {
+    if (!this.browser && !this.context) {
       return
     }
 
-    await this.browser.close()
-    this.browser = null
+    if (this.context) {
+      await this.context.close()
+      this.context = null
+    }
+    if (this.browser) {
+      await this.browser.close()
+      this.browser = null
+    }
     this.page = null
     this.consoleBuffer = []
     this.networkRequests = []
@@ -92,22 +124,79 @@ export class BrowserManager {
     this.requestIdCounter = 0
   }
 
+  private getDefaultChromeUserDataDir(): string | null {
+    const platformName = platform()
+
+    if (platformName === 'darwin') {
+      return join(
+        homedir(),
+        'Library',
+        'Application Support',
+        'Google',
+        'Chrome'
+      )
+    }
+
+    if (platformName === 'linux') {
+      return join(homedir(), '.config', 'google-chrome')
+    }
+
+    if (platformName === 'win32') {
+      return join(
+        process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local'),
+        'Google',
+        'Chrome',
+        'User Data'
+      )
+    }
+
+    return null
+  }
+
   async launch(): Promise<void> {
-    if (this.browser) {
+    if (this.browser || this.context) {
       return
     }
 
     try {
       console.error('Launching browser...')
 
-      const isHeadless = process.env.HEADLESS === 'true'
+      const browserType = this.config.browserType ?? 'chrome'
+      const sessionType = this.config.sessionType ?? 'existing'
+      const isHeadless = this.config.headless ?? false
 
-      this.browser = await chromium.launch({
-        headless: isHeadless,
-        timeout: 5_000
-      })
+      if (sessionType === 'existing') {
+        const userDataDir =
+          this.config.userDataDir ?? this.getDefaultChromeUserDataDir()
 
-      console.error(`Browser launched successfully (headless: ${isHeadless})`)
+        if (!userDataDir) {
+          throw new Error(
+            'Could not determine Chrome user data directory for this platform.'
+          )
+        }
+
+        console.error(`Launching with persistent context: ${userDataDir}.`)
+
+        this.context = await chromium.launchPersistentContext(userDataDir, {
+          channel: browserType === 'chrome' ? 'chrome' : undefined,
+          headless: isHeadless,
+          timeout: 5_000
+        })
+
+        console.error(
+          `Browser launched successfully with persistent context (headless: ${isHeadless}).`
+        )
+      } else {
+        console.error('Launching fresh browser instance.')
+
+        this.browser = await chromium.launch({
+          channel: browserType === 'chrome' ? 'chrome' : undefined,
+          headless: isHeadless,
+          timeout: 5_000
+        })
+
+        console.error(`Browser launched successfully (headless: ${isHeadless})`)
+      }
     } catch (error) {
       console.error('Error launching browser:', error)
       throw error
@@ -117,7 +206,7 @@ export class BrowserManager {
   async navigate(url: string): Promise<void> {
     console.error(`Navigating to: ${url}`)
 
-    if (!this.browser) {
+    if (!this.browser && !this.context) {
       await this.launch()
     }
 
@@ -126,7 +215,14 @@ export class BrowserManager {
     this.networkRequests = []
     this.requestIdCounter = 0
 
-    const context = await this.browser!.newContext()
+    let context: BrowserContext
+
+    if (this.context) {
+      context = this.context
+    } else {
+      invariant(this.browser, 'A browser instance is required.')
+      context = await this.browser.newContext()
+    }
 
     if (this.page) {
       await this.page.close()

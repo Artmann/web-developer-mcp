@@ -13,7 +13,8 @@ export class MCPTestClient {
       args: [resolve(process.cwd(), 'src/index.ts')],
       env: {
         ...process.env,
-        HEADLESS: 'true'
+        HEADLESS: 'true',
+        SESSION_TYPE: 'fresh'
       }
     })
 

@@ -41,7 +41,8 @@ with these tasks.
 
 ## Installation
 
-Add this server to your AI assistant's MCP configuration (see [Configuration](#configuration) section below for specific setup instructions).
+Add this server to your AI assistant's MCP configuration (see
+[Configuration](#configuration) section below for specific setup instructions).
 
 ### From Source
 
@@ -63,6 +64,39 @@ The server will start and wait for MCP client connections from your AI
 assistant.
 
 ## Configuration
+
+### Environment Variables
+
+The server can be configured with the following environment variables:
+
+#### `BROWSER_TYPE` (default: `"chrome"`)
+
+- `"chrome"` - Use system-installed Chrome
+- `"chromium"` - Use Playwright's bundled Chromium
+
+#### `SESSION_TYPE` (default: `"existing"`)
+
+- `"existing"` - Reuse existing Chrome profile with cookies and session data
+  (skips authentication flows). **Note:** Chrome must be closed before starting
+  the server to use this mode, as Chrome locks the profile when running.
+- `"fresh"` - Start with fresh session (no cookies, local storage, or session
+  data)
+
+#### `USER_DATA_DIR` (optional)
+
+Custom path to Chrome user data directory. If not set, uses platform-specific
+defaults:
+
+- **macOS**: `~/Library/Application Support/Google/Chrome`
+- **Linux**: `~/.config/google-chrome`
+- **Windows**: `%LOCALAPPDATA%\Google\Chrome\User Data`
+
+#### `HEADLESS` (default: `"false"`)
+
+- `"true"` - Run browser in headless mode (no visible window)
+- `"false"` - Run browser with visible window
+
+### AI Assistant Configuration
 
 Add this server to your AI assistant's MCP configuration:
 
@@ -88,6 +122,66 @@ Add this server using the Claude Code CLI:
 ```bash
 claude mcp add -s user web-developer-mcp npx web-developer-mcp
 ```
+
+### Configuration Examples
+
+#### Default Configuration (Existing Chrome Session)
+
+By default, the server uses your existing Chrome profile, preserving all cookies
+and session data. **Important:** Close Chrome before starting the server to use
+your existing profile.
+
+```bash
+# Cursor/Claude Code will use default settings automatically
+# BROWSER_TYPE=chrome, SESSION_TYPE=existing
+# Make sure Chrome is closed first!
+```
+
+#### Fresh Chrome Session
+
+Use Chrome but start with a clean session:
+
+```bash
+# Set environment variable before starting
+SESSION_TYPE=fresh npx web-developer-mcp
+```
+
+Or in your MCP config:
+
+```json
+{
+  "web-developer-mcp": {
+    "command": "npx",
+    "args": ["web-developer-mcp"],
+    "env": {
+      "SESSION_TYPE": "fresh"
+    }
+  }
+}
+```
+
+#### Chromium with Fresh Session
+
+Use Playwright's bundled Chromium instead of Chrome:
+
+```bash
+BROWSER_TYPE=chromium SESSION_TYPE=fresh npx web-developer-mcp
+```
+
+#### Custom Chrome Profile Path
+
+Specify a custom Chrome profile directory:
+
+```bash
+USER_DATA_DIR="/path/to/custom/profile" npx web-developer-mcp
+```
+
+**Important Notes:**
+
+- Chrome must be completely closed before starting the server with
+  `SESSION_TYPE=existing`
+- If Chrome is running, you'll see errors about the profile being locked
+- To use the server while Chrome is open, use `SESSION_TYPE=fresh` instead
 
 ## Available Tools
 
@@ -265,7 +359,10 @@ Clear the network request buffer to start fresh monitoring.
 
 ## Browser Behavior
 
-- Uses Playwright with Chromium in headless mode
+- By default, uses system-installed Chrome with your existing profile (preserves
+  authentication)
+- Can be configured to use Chromium or fresh sessions via environment variables
 - Maintains a single persistent browser session
 - Automatically captures console logs and network requests
 - Browser state persists between tool calls until restart
+- Runs in visible mode by default (set `HEADLESS=true` for headless operation)

@@ -138,3 +138,7 @@ await new Promise((resolve) => setTimeout(resolve, 1000))
   execution (setTimeout) to verify navigation state management works correctly
 - **Test Coverage**: Include tests for immediate, short-delay (100-200ms), and
   longer-delay (200+ ms) content creation
+- Use the tiny-invariant package to assert expected values. invariant(browser,
+  'A browser instance is required.')
+- Don't use switch statements
+- Prefer early exists
