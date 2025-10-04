@@ -120,11 +120,23 @@ export class Server {
             .describe(
               'Filter requests by URL substring (e.g. "api", "/users")'
             ),
+          head: z
+            .number()
+            .positive()
+            .optional()
+            .describe('Return only the first N network requests'),
           statusRange: z
             .string()
             .optional()
             .describe(
               'Filter by HTTP status code range (e.g. "400-499", "500-599") or single status (e.g. "404")'
+            ),
+          tail: z
+            .number()
+            .positive()
+            .optional()
+            .describe(
+              'Return only the last N network requests (takes precedence over head if both provided)'
             )
         }
       },
