@@ -23,10 +23,13 @@ src/
 ├── browser/
 │   └── BrowserManager.ts      # Singleton browser management
 └── tools/
-    ├── navigate.ts            # Browser navigation
+    ├── click.ts               # Element clicking
     ├── console.ts             # Console output retrieval
+    ├── fill.ts                # Form input filling
+    ├── navigate.ts            # Browser navigation
     ├── query-dom.ts           # DOM element inspection
-    └── query-html.ts          # HTML extraction
+    ├── query-html.ts          # HTML extraction
+    └── submit.ts              # Form submission
 ```
 
 ### Browser Management
@@ -109,6 +112,9 @@ handle asynchronous JavaScript execution:
   generated HTML
 - **Reload tool**: Uses navigation state management by calling `navigate()`
   instead of direct `page.reload()`
+- **Interaction tools** (click, fill, submit): Wait for navigation completion
+  before executing actions; click and submit tools include additional wait time
+  for JavaScript execution after the action
 
 #### Implementation Pattern:
 

@@ -2,14 +2,17 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
 
-import { navigateHandler } from './tools/navigate'
-import { reloadHandler } from './tools/reload'
+import { clickHandler } from './tools/click'
 import { consoleHandler } from './tools/console'
+import { fillHandler } from './tools/fill'
+import { navigateHandler } from './tools/navigate'
+import { networkClearHandler } from './tools/network-clear'
+import { networkInspectHandler } from './tools/network-inspect'
+import { networkRequestsHandler } from './tools/network-requests'
 import { queryDomHandler } from './tools/query-dom'
 import { queryHtmlHandler } from './tools/query-html'
-import { networkRequestsHandler } from './tools/network-requests'
-import { networkInspectHandler } from './tools/network-inspect'
-import { networkClearHandler } from './tools/network-clear'
+import { reloadHandler } from './tools/reload'
+import { submitHandler } from './tools/submit'
 
 export class Server {
   private mcpServer: McpServer
@@ -171,6 +174,56 @@ export class Server {
           'Clear the network request buffer to start fresh monitoring'
       },
       networkClearHandler
+    )
+
+    this.mcpServer.registerTool(
+      'click-element',
+      {
+        title: 'Click Element',
+        description:
+          'Click on an element (button, link, etc.) using a CSS selector',
+        inputSchema: {
+          selector: z
+            .string()
+            .describe(
+              'CSS selector for the element to click (e.g. "button.submit", "#login-btn")'
+            )
+        }
+      },
+      clickHandler
+    )
+
+    this.mcpServer.registerTool(
+      'fill-input',
+      {
+        title: 'Fill Input Field',
+        description: 'Fill a form input field with text',
+        inputSchema: {
+          selector: z
+            .string()
+            .describe(
+              'CSS selector for the input element (e.g. "input[name=email]", "#username")'
+            ),
+          value: z.string().describe('The text value to enter into the field')
+        }
+      },
+      fillHandler
+    )
+
+    this.mcpServer.registerTool(
+      'submit-form',
+      {
+        title: 'Submit Form',
+        description: 'Submit a form element',
+        inputSchema: {
+          selector: z
+            .string()
+            .describe(
+              'CSS selector for the form element (e.g. "form#login", "form[name=contact]")'
+            )
+        }
+      },
+      submitHandler
     )
   }
 

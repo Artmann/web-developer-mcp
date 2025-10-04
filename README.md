@@ -31,6 +31,7 @@ with these tasks.
 
 - **Live Browser Integration**: Uses Playwright with a persistent browser
   session
+- **Page Interactions**: Click elements, fill form inputs, and submit forms
 - **Network Request Monitoring**: Capture and analyze HTTP requests/responses
 - **Real-time Console Monitoring**: Captures console logs, errors, and warnings
   as they happen
@@ -112,6 +113,54 @@ Reload the current page and refresh console logs.
 **No parameters required**
 
 **Use case:** Refresh the page after code changes or to clear current state
+
+### Page Interactions
+
+#### `click-element`
+
+Click on an element (button, link, etc.) using a CSS selector.
+
+**Parameters:**
+
+- `selector` (string): CSS selector for the element to click (e.g.
+  `"button.submit"`, `"#login-btn"`)
+
+**Example use cases:**
+
+- Click buttons to trigger actions
+- Click links to navigate
+- Interact with UI elements during testing
+
+#### `fill-input`
+
+Fill a form input field with text.
+
+**Parameters:**
+
+- `selector` (string): CSS selector for the input element (e.g.
+  `"input[name=email]"`, `"#username"`)
+- `value` (string): The text value to enter into the field
+
+**Example use cases:**
+
+- Fill out login forms
+- Enter test data into inputs
+- Populate form fields for testing
+
+#### `submit-form`
+
+Submit a form element.
+
+**Parameters:**
+
+- `selector` (string): CSS selector for the form element (e.g. `"form#login"`,
+  `"form[name=contact]"`)
+
+**Example use cases:**
+
+- Submit forms after filling inputs
+- Trigger form validation
+- Test form submission workflows
 
 ### Console Monitoring
 
@@ -244,6 +293,8 @@ You have access to browser automation tools via web-developer-mcp:
 
 **Browser:** `browser-navigate(url)`, `browser-reload()`
 
+**Interactions:** `click-element(selector)`, `fill-input(selector, value)`, `submit-form(selector)`
+
 **Console:** `browser-console(filter?, head?, tail?)` - Get logs/errors/warnings
 - Filter by text: `browser-console(filter='[error]')`
 - Last N logs: `browser-console(tail=10)`
@@ -254,7 +305,7 @@ You have access to browser automation tools via web-developer-mcp:
 - Failed requests: `network-requests(statusRange='400-599')`
 - API calls: `network-requests(filter='/api/', tail=5)`
 
-Use for debugging web apps, analyzing network requests, inspecting console errors, or examining DOM elements.
+Use for debugging web apps, interacting with pages, analyzing network requests, inspecting console errors, or examining DOM elements.
 ```
 
 ## Common Use Cases
@@ -281,6 +332,14 @@ Use for debugging web apps, analyzing network requests, inspecting console error
 3. Filter for specific API endpoints: `network-requests` with URL filter
 4. Inspect request/response details: `network-inspect`
 5. Clear history and test again: `network-clear`
+
+### Testing Form Workflows
+
+1. Navigate to page with form
+2. Fill form fields: `fill-input` with field selectors and values
+3. Submit the form: `submit-form` with form selector
+4. Check console for errors: `browser-console`
+5. Monitor API requests: `network-requests` to verify form submission
 
 ## Requirements
 
