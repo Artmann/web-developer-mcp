@@ -3,10 +3,14 @@ import { createSuccessResponse, createErrorResponse } from '../response'
 
 export async function networkRequestsHandler({
   filter,
-  statusRange
+  head,
+  statusRange,
+  tail
 }: {
   filter?: string
+  head?: number
   statusRange?: string
+  tail?: number
 } = {}) {
   try {
     const browserManager = BrowserManager.getInstance()
@@ -41,6 +45,13 @@ export async function networkRequestsHandler({
         const targetStatus = parts[0]!
         requests = requests.filter((req) => req.status === targetStatus)
       }
+    }
+
+    // Apply tail or head (tail takes precedence)
+    if (tail !== undefined && tail > 0) {
+      requests = requests.slice(-tail)
+    } else if (head !== undefined && head > 0) {
+      requests = requests.slice(0, head)
     }
 
     if (requests.length === 0) {

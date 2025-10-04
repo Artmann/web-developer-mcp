@@ -291,4 +291,178 @@ describe('network-requests tool', () => {
       })
     }
   })
+
+  it('should return only first N requests with head parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head><title>Head Test</title></head>
+<body>
+    <script>
+        fetch('data:text/plain,request1');
+        fetch('data:text/plain,request2');
+        fetch('data:text/plain,request3');
+        fetch('data:text/plain,request4');
+        fetch('data:text/plain,request5');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    const result = await client.callTool('network-requests', {
+      head: 2
+    })
+
+    if (!result.content[0].text.includes('No network requests')) {
+      const parsed = JSON.parse(result.content[0].text)
+      expect(parsed.count).toBe(2)
+      expect(parsed.requests).toHaveLength(2)
+      expect(parsed.requests[0].url).toContain('request1')
+      expect(parsed.requests[1].url).toContain('request2')
+    }
+  })
+
+  it('should return only last N requests with tail parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head><title>Tail Test</title></head>
+<body>
+    <script>
+        fetch('data:text/plain,request1');
+        fetch('data:text/plain,request2');
+        fetch('data:text/plain,request3');
+        fetch('data:text/plain,request4');
+        fetch('data:text/plain,request5');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    const result = await client.callTool('network-requests', {
+      tail: 2
+    })
+
+    if (!result.content[0].text.includes('No network requests')) {
+      const parsed = JSON.parse(result.content[0].text)
+      expect(parsed.count).toBe(2)
+      expect(parsed.requests).toHaveLength(2)
+      expect(parsed.requests[0].url).toContain('request4')
+      expect(parsed.requests[1].url).toContain('request5')
+    }
+  })
+
+  it('should prioritize tail over head when both are provided', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head><title>Tail Priority Test</title></head>
+<body>
+    <script>
+        fetch('data:text/plain,request1');
+        fetch('data:text/plain,request2');
+        fetch('data:text/plain,request3');
+        fetch('data:text/plain,request4');
+        fetch('data:text/plain,request5');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    const result = await client.callTool('network-requests', {
+      head: 2,
+      tail: 3
+    })
+
+    if (!result.content[0].text.includes('No network requests')) {
+      const parsed = JSON.parse(result.content[0].text)
+      expect(parsed.count).toBe(3)
+      expect(parsed.requests).toHaveLength(3)
+      expect(parsed.requests[0].url).toContain('request3')
+      expect(parsed.requests[1].url).toContain('request4')
+      expect(parsed.requests[2].url).toContain('request5')
+    }
+  })
+
+  it('should combine filter with head parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head><title>Filter + Head Test</title></head>
+<body>
+    <script>
+        fetch('data:application/json,{"id":1}');
+        fetch('data:text/plain,other1');
+        fetch('data:application/json,{"id":2}');
+        fetch('data:application/json,{"id":3}');
+        fetch('data:text/plain,other2');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    const result = await client.callTool('network-requests', {
+      filter: 'application/json',
+      head: 2
+    })
+
+    if (!result.content[0].text.includes('No network requests')) {
+      const parsed = JSON.parse(result.content[0].text)
+      expect(parsed.count).toBe(2)
+      expect(parsed.requests).toHaveLength(2)
+      expect(parsed.requests[0].url).toContain('{"id":1}')
+      expect(parsed.requests[1].url).toContain('{"id":2}')
+    }
+  })
+
+  it('should combine filter with tail parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head><title>Filter + Tail Test</title></head>
+<body>
+    <script>
+        fetch('data:application/json,{"id":1}');
+        fetch('data:text/plain,other1');
+        fetch('data:application/json,{"id":2}');
+        fetch('data:application/json,{"id":3}');
+        fetch('data:text/plain,other2');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    const result = await client.callTool('network-requests', {
+      filter: 'application/json',
+      tail: 2
+    })
+
+    if (!result.content[0].text.includes('No network requests')) {
+      const parsed = JSON.parse(result.content[0].text)
+      expect(parsed.count).toBe(2)
+      expect(parsed.requests).toHaveLength(2)
+      expect(parsed.requests[0].url).toContain('{"id":2}')
+      expect(parsed.requests[1].url).toContain('{"id":3}')
+    }
+  })
 })
