@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 
 import { MCPTestClient } from '../testing/mcp-test-client'
-import { waitFor } from '../utils/wait-for'
 
 describe('browser-console tool', () => {
   let client: MCPTestClient
@@ -54,9 +53,6 @@ describe('browser-console tool', () => {
 
     expect(navigateResult.content[0].text).toContain('Successfully navigated')
 
-    // Wait a moment for console logs to be captured
-    await waitFor(1000)
-
     // Get console logs
     const result = await client.callTool('browser-console')
 
@@ -90,9 +86,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    // Wait a moment for console logs to be captured
-    await waitFor(1000)
-
     // Get console logs
     const result = await client.callTool('browser-console')
 
@@ -119,9 +112,6 @@ describe('browser-console tool', () => {
     await client.callTool('browser-navigate', {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
-
-    // Wait a moment
-    await waitFor(1000)
 
     // Get console logs
     const result = await client.callTool('browser-console')
@@ -228,8 +218,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlWithLogs).toString('base64')}`
     })
 
-    await waitFor(1000)
-
     // Verify we have logs
     const firstResult = await client.callTool('browser-console')
     expect(firstResult.content[0].text).toContain('This is a test log message')
@@ -238,8 +226,6 @@ describe('browser-console tool', () => {
     await client.callTool('browser-navigate', {
       url: `data:text/html;base64,${Buffer.from(emptyHtml).toString('base64')}`
     })
-
-    await waitFor(1000)
 
     // Console should be cleared
     const secondResult = await client.callTool('browser-console')
@@ -274,8 +260,6 @@ describe('browser-console tool', () => {
     await client.callTool('browser-navigate', {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
-
-    await waitFor(1000)
 
     // Filter for logs containing "User"
     const result = await client.callTool('browser-console', {
@@ -313,8 +297,6 @@ describe('browser-console tool', () => {
     await client.callTool('browser-navigate', {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
-
-    await waitFor(1000)
 
     // Filter for logs containing "error" (should match "ERROR" and "error")
     const result = await client.callTool('browser-console', {
@@ -355,8 +337,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await waitFor(1000)
-
     // Get first 2 logs
     const result = await client.callTool('browser-console', {
       head: 2
@@ -396,8 +376,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await waitFor(1000)
-
     // Get last 2 logs
     const result = await client.callTool('browser-console', {
       tail: 2
@@ -436,8 +414,6 @@ describe('browser-console tool', () => {
     await client.callTool('browser-navigate', {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
-
-    await waitFor(1000)
 
     // Provide both head and tail - tail should win
     const result = await client.callTool('browser-console', {
@@ -480,8 +456,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await waitFor(1000)
-
     // Filter for "User" and get first 2 results
     const result = await client.callTool('browser-console', {
       filter: 'User',
@@ -523,8 +497,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await waitFor(1000)
-
     // Filter for "User" and get last 2 results
     const result = await client.callTool('browser-console', {
       filter: 'User',
@@ -565,8 +537,6 @@ describe('browser-console tool', () => {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
 
-    await waitFor(1000)
-
     // Filter for error type
     const result = await client.callTool('browser-console', {
       filter: '[error]'
@@ -602,8 +572,6 @@ describe('browser-console tool', () => {
     await client.callTool('browser-navigate', {
       url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
     })
-
-    await waitFor(1000)
 
     // Filter for something that doesn't exist
     const result = await client.callTool('browser-console', {

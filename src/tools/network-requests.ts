@@ -1,5 +1,6 @@
 import { BrowserManager } from '../browser/BrowserManager'
 import { createSuccessResponse, createErrorResponse } from '../response'
+import { waitFor } from '../utils/wait-for'
 
 export async function networkRequestsHandler({
   filter,
@@ -21,6 +22,12 @@ export async function networkRequestsHandler({
         'No page is currently loaded. Please navigate to a page first.'
       )
     }
+
+    // Wait for any ongoing navigation to complete
+    await browserManager.waitForNavigationComplete()
+
+    // Give network requests additional time to complete
+    await waitFor(1000)
 
     let requests = browserManager.getNetworkRequests()
 
