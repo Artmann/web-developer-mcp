@@ -233,6 +233,30 @@ Clear the network request buffer to start fresh monitoring.
 
 **Use case:** Clear request history to focus on new requests after page changes
 
+## AI Agent Instructions
+
+Add this to your `.cursorrules`, `CLAUDE.md`, or AI assistant configuration:
+
+```markdown
+# Web Developer MCP
+
+You have access to browser automation tools via web-developer-mcp:
+
+**Browser:** `browser-navigate(url)`, `browser-reload()`
+
+**Console:** `browser-console(filter?, head?, tail?)` - Get logs/errors/warnings
+- Filter by text: `browser-console(filter='[error]')`
+- Last N logs: `browser-console(tail=10)`
+
+**DOM:** `inspect-elements(selector)`, `extract-html(selector)`
+
+**Network:** `network-requests(filter?, statusRange?, head?, tail?)`, `network-inspect(id|urlPattern)`, `network-clear()`
+- Failed requests: `network-requests(statusRange='400-599')`
+- API calls: `network-requests(filter='/api/', tail=5)`
+
+Use for debugging web apps, analyzing network requests, inspecting console errors, or examining DOM elements.
+```
+
 ## Common Use Cases
 
 ### Debugging a Web Application
