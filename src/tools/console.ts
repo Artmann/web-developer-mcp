@@ -2,7 +2,15 @@ import { BrowserManager } from '../browser/BrowserManager'
 import { createSuccessResponse, createErrorResponse } from '../response'
 import { waitFor } from '../utils/wait-for'
 
-export async function consoleHandler() {
+export async function consoleHandler({
+  filter,
+  head,
+  tail
+}: {
+  filter?: string
+  head?: number
+  tail?: number
+} = {}) {
   try {
     const browserManager = BrowserManager.getInstance()
 
@@ -12,7 +20,21 @@ export async function consoleHandler() {
     // Give JavaScript additional time to execute and generate logs
     await waitFor(1000)
 
-    const consoleLogs = browserManager.getConsoleLogs()
+    let consoleLogs = browserManager.getConsoleLogs()
+
+    // Apply filter if provided
+    if (filter) {
+      consoleLogs = consoleLogs.filter((log) =>
+        log.toLowerCase().includes(filter.toLowerCase())
+      )
+    }
+
+    // Apply tail or head (tail takes precedence)
+    if (tail !== undefined && tail > 0) {
+      consoleLogs = consoleLogs.slice(-tail)
+    } else if (head !== undefined && head > 0) {
+      consoleLogs = consoleLogs.slice(0, head)
+    }
 
     const text =
       consoleLogs.length > 0

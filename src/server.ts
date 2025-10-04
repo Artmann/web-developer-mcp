@@ -48,7 +48,27 @@ export class Server {
       {
         title: 'Get Console Output',
         description:
-          'Retrieve all console messages (logs, errors, warnings) from the current page'
+          'Retrieve all console messages (logs, errors, warnings) from the current page',
+        inputSchema: {
+          filter: z
+            .string()
+            .optional()
+            .describe(
+              'Filter console logs by text content (case-insensitive substring match)'
+            ),
+          head: z
+            .number()
+            .positive()
+            .optional()
+            .describe('Return only the first N console logs'),
+          tail: z
+            .number()
+            .positive()
+            .optional()
+            .describe(
+              'Return only the last N console logs (takes precedence over head if both provided)'
+            )
+        }
       },
       consoleHandler
     )
