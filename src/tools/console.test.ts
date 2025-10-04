@@ -250,4 +250,373 @@ describe('browser-console tool', () => {
       }
     ])
   })
+
+  it('should filter console logs by text content', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filter Test Page</title>
+</head>
+<body>
+    <h1>Filter Test Page</h1>
+
+    <script>
+        console.log('User logged in');
+        console.error('Database connection failed');
+        console.log('User logged out');
+        console.warn('Warning: low memory');
+        console.log('Processing request');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Filter for logs containing "User"
+    const result = await client.callTool('browser-console', {
+      filter: 'User'
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] User logged in\n[log] User logged out'
+        }
+      ]
+    })
+  })
+
+  it('should filter console logs case-insensitively', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filter Test Page</title>
+</head>
+<body>
+    <h1>Filter Test Page</h1>
+
+    <script>
+        console.log('ERROR: something went wrong');
+        console.error('Connection error');
+        console.log('Success message');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Filter for logs containing "error" (should match "ERROR" and "error")
+    const result = await client.callTool('browser-console', {
+      filter: 'error'
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] ERROR: something went wrong\n[error] Connection error'
+        }
+      ]
+    })
+  })
+
+  it('should return only first N logs with head parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Head Test Page</title>
+</head>
+<body>
+    <h1>Head Test Page</h1>
+
+    <script>
+        console.log('Log 1');
+        console.log('Log 2');
+        console.log('Log 3');
+        console.log('Log 4');
+        console.log('Log 5');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Get first 2 logs
+    const result = await client.callTool('browser-console', {
+      head: 2
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Log 1\n[log] Log 2'
+        }
+      ]
+    })
+  })
+
+  it('should return only last N logs with tail parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tail Test Page</title>
+</head>
+<body>
+    <h1>Tail Test Page</h1>
+
+    <script>
+        console.log('Log 1');
+        console.log('Log 2');
+        console.log('Log 3');
+        console.log('Log 4');
+        console.log('Log 5');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Get last 2 logs
+    const result = await client.callTool('browser-console', {
+      tail: 2
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Log 4\n[log] Log 5'
+        }
+      ]
+    })
+  })
+
+  it('should prioritize tail over head when both are provided', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tail Priority Test Page</title>
+</head>
+<body>
+    <h1>Tail Priority Test Page</h1>
+
+    <script>
+        console.log('Log 1');
+        console.log('Log 2');
+        console.log('Log 3');
+        console.log('Log 4');
+        console.log('Log 5');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Provide both head and tail - tail should win
+    const result = await client.callTool('browser-console', {
+      head: 2,
+      tail: 3
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] Log 3\n[log] Log 4\n[log] Log 5'
+        }
+      ]
+    })
+  })
+
+  it('should combine filter with head parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filter + Head Test Page</title>
+</head>
+<body>
+    <h1>Filter + Head Test Page</h1>
+
+    <script>
+        console.log('User action 1');
+        console.error('System error');
+        console.log('User action 2');
+        console.log('User action 3');
+        console.warn('Warning message');
+        console.log('User action 4');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Filter for "User" and get first 2 results
+    const result = await client.callTool('browser-console', {
+      filter: 'User',
+      head: 2
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] User action 1\n[log] User action 2'
+        }
+      ]
+    })
+  })
+
+  it('should combine filter with tail parameter', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filter + Tail Test Page</title>
+</head>
+<body>
+    <h1>Filter + Tail Test Page</h1>
+
+    <script>
+        console.log('User action 1');
+        console.error('System error');
+        console.log('User action 2');
+        console.log('User action 3');
+        console.warn('Warning message');
+        console.log('User action 4');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Filter for "User" and get last 2 results
+    const result = await client.callTool('browser-console', {
+      filter: 'User',
+      tail: 2
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[log] User action 3\n[log] User action 4'
+        }
+      ]
+    })
+  })
+
+  it('should filter by log type (error)', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Type Filter Test Page</title>
+</head>
+<body>
+    <h1>Type Filter Test Page</h1>
+
+    <script>
+        console.log('Normal log message');
+        console.error('Error message 1');
+        console.warn('Warning message');
+        console.error('Error message 2');
+        console.log('Another log message');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Filter for error type
+    const result = await client.callTool('browser-console', {
+      filter: '[error]'
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: '[error] Error message 1\n[error] Error message 2'
+        }
+      ]
+    })
+  })
+
+  it('should return no logs message when filter matches nothing', async () => {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>No Match Filter Test Page</title>
+</head>
+<body>
+    <h1>No Match Filter Test Page</h1>
+
+    <script>
+        console.log('Log message 1');
+        console.log('Log message 2');
+    </script>
+</body>
+</html>`
+
+    await client.callTool('browser-navigate', {
+      url: `data:text/html;base64,${Buffer.from(htmlContent).toString('base64')}`
+    })
+
+    await waitFor(1000)
+
+    // Filter for something that doesn't exist
+    const result = await client.callTool('browser-console', {
+      filter: 'nonexistent'
+    })
+
+    expect(result).toEqual({
+      content: [
+        {
+          type: 'text',
+          text: 'No console logs available.'
+        }
+      ]
+    })
+  })
 })

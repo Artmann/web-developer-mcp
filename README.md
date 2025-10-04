@@ -41,7 +41,8 @@ with these tasks.
 
 ## Installation
 
-Add this server to your AI assistant's MCP configuration (see [Configuration](#configuration) section below for specific setup instructions).
+Add this server to your AI assistant's MCP configuration (see
+[Configuration](#configuration) section below for specific setup instructions).
 
 ### From Source
 
