@@ -91,6 +91,30 @@ Add this server using the Claude Code CLI:
 claude mcp add -s user web-developer-mcp npx web-developer-mcp
 ```
 
+## Environment Variables
+
+The server supports the following environment variables for configuration:
+
+- **`HEADLESS`**: Set to `"true"` to run browser in headless mode (default: `"true"`)
+- **`MCP_USER_DATA_DIR`**: Custom directory for persistent browser data (default: `.mcp-user-data` in current working directory)
+
+### Browser Persistence Modes
+
+The browser can run in two modes:
+
+- **Persistent Mode** (default): Browser data (cookies, localStorage, etc.) persists across sessions. Uses a user data directory for storage.
+- **Ephemeral Mode**: Browser runs with no persistent data. All data is cleared when the browser closes.
+
+You can programmatically control this behavior using the BrowserManager API:
+
+```javascript
+// Use ephemeral mode (no persistence)
+const browserManager = await BrowserManager.createInstance(false)
+
+// Use persistent mode (default)
+const browserManager = await BrowserManager.createInstance(true)
+```
+
 ## Available Tools
 
 ### Browser Navigation
@@ -349,7 +373,9 @@ Use for debugging web apps, interacting with pages, analyzing network requests, 
 
 ## Browser Behavior
 
-- Uses Playwright with Chromium in headless mode
-- Maintains a single persistent browser session
+- Uses Playwright with Chromium in headless mode (configurable via `HEADLESS` environment variable)
+- Maintains a single browser session per BrowserManager instance
 - Automatically captures console logs and network requests
-- Browser state persists between tool calls until restart
+- **Persistent Mode** (default): Browser data persists between sessions using a user data directory
+- **Ephemeral Mode**: Browser runs with no persistent data, all data cleared on close
+- Browser state persists between tool calls within the same session

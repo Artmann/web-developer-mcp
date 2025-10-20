@@ -31,11 +31,13 @@ export interface NetworkRequest {
 export class BrowserManager {
   private static instance: BrowserManager | null = null
   private browser: BrowserContext | null = null
+  private browserInstance: Browser | null = null
   private page: Page | null = null
   private consoleBuffer: string[] = []
   private networkRequests: NetworkRequest[] = []
   private requestIdCounter: number = 0
   private isNavigating: boolean = false
+  private isPersistent: boolean = true
 
   private constructor() {}
 
@@ -47,12 +49,37 @@ export class BrowserManager {
     return BrowserManager.instance
   }
 
+  /**
+   * Create a new BrowserManager instance with specified persistence mode.
+   * Note: This will close any existing browser instance.
+   * @param persistent - If true, browser data will persist across sessions. If false, browser runs in ephemeral mode.
+   * @returns BrowserManager instance
+   */
+  static async createInstance(
+    persistent: boolean = true
+  ): Promise<BrowserManager> {
+    const instance = BrowserManager.getInstance()
+
+    if (instance.browser && instance.isPersistent !== persistent) {
+      await instance.close()
+    }
+
+    instance.setPersistent(persistent)
+    return instance
+  }
+
   async close(): Promise<void> {
     if (!this.browser) {
       return
     }
 
     await this.browser.close()
+
+    if (this.browserInstance) {
+      await this.browserInstance.close()
+      this.browserInstance = null
+    }
+
     this.browser = null
     this.page = null
     this.consoleBuffer = []
@@ -95,28 +122,66 @@ export class BrowserManager {
     this.requestIdCounter = 0
   }
 
+  /**
+   * Set whether the browser should persist data across sessions.
+   * @param persistent - If true, browser data will persist. If false, runs in ephemeral mode.
+   * @throws Error if browser is currently running
+   */
+  setPersistent(persistent: boolean): void {
+    if (this.browser) {
+      throw new Error(
+        'Cannot change persistence mode while browser is running. Call close() first.'
+      )
+    }
+    this.isPersistent = persistent
+  }
+
+  /**
+   * Check if the browser is configured to run in persistent mode.
+   * @returns true if persistent, false if ephemeral
+   */
+  isPersistentMode(): boolean {
+    return this.isPersistent
+  }
+
   async launch(): Promise<void> {
     if (this.browser) {
       return
     }
 
     try {
-      console.error('Launching browser...')
-
       const isHeadless = process.env.HEADLESS === 'true'
 
-      const userDataDir =
-        process.env.MCP_USER_DATA_DIR ||
-        path.resolve(process.cwd(), '.mcp-user-data') // fallback local profile
+      if (this.isPersistent) {
+        console.error('Launching persistent browser...')
 
-      // ensure the directory exists
-      fs.mkdirSync(userDataDir, { recursive: true })
+        const userDataDir =
+          process.env.MCP_USER_DATA_DIR ||
+          path.resolve(process.cwd(), '.mcp-user-data') // fallback local profile
 
-      this.browser = await chromium.launchPersistentContext(userDataDir, {
-        headless: isHeadless
-      })
+        // ensure the directory exists
+        fs.mkdirSync(userDataDir, { recursive: true })
 
-      console.error(`Browser launched successfully (headless: ${isHeadless})`)
+        this.browser = await chromium.launchPersistentContext(userDataDir, {
+          headless: isHeadless
+        })
+
+        console.error(
+          `Persistent browser launched successfully (headless: ${isHeadless})`
+        )
+      } else {
+        console.error('Launching ephemeral browser...')
+
+        this.browserInstance = await chromium.launch({
+          headless: isHeadless
+        })
+
+        this.browser = await this.browserInstance.newContext()
+
+        console.error(
+          `Ephemeral browser launched successfully (headless: ${isHeadless})`
+        )
+      }
     } catch (error) {
       console.error('Error launching browser:', error)
       throw error
