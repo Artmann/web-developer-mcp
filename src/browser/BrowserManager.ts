@@ -1,11 +1,14 @@
 import {
   chromium,
   type Browser,
+  type BrowserContext,
   type Page,
   type ConsoleMessage,
   type Request,
   type Response
 } from 'playwright'
+import fs from 'node:fs'
+import path from 'node:path'
 
 import { waitFor } from '../utils/wait-for'
 
@@ -27,7 +30,7 @@ export interface NetworkRequest {
 
 export class BrowserManager {
   private static instance: BrowserManager | null = null
-  private browser: Browser | null = null
+  private browser: BrowserContext | null = null
   private page: Page | null = null
   private consoleBuffer: string[] = []
   private networkRequests: NetworkRequest[] = []
@@ -102,9 +105,15 @@ export class BrowserManager {
 
       const isHeadless = process.env.HEADLESS === 'true'
 
-      this.browser = await chromium.launch({
-        headless: isHeadless,
-        timeout: 5_000
+      const userDataDir =
+        process.env.MCP_USER_DATA_DIR ||
+        path.resolve(process.cwd(), '.mcp-user-data') // fallback local profile
+
+      // ensure the directory exists
+      fs.mkdirSync(userDataDir, { recursive: true })
+
+      this.browser = await chromium.launchPersistentContext(userDataDir, {
+        headless: isHeadless
       })
 
       console.error(`Browser launched successfully (headless: ${isHeadless})`)
@@ -126,13 +135,11 @@ export class BrowserManager {
     this.networkRequests = []
     this.requestIdCounter = 0
 
-    const context = await this.browser!.newContext()
-
     if (this.page) {
       await this.page.close()
     }
 
-    this.page = await context.newPage()
+    this.page = await this.browser!.newPage()
 
     this.page.on('console', (msg: ConsoleMessage) => {
       this.consoleBuffer.push(`[${msg.type()}] ${msg.text()}`)
