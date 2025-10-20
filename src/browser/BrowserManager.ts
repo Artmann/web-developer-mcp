@@ -1,11 +1,14 @@
 import {
   chromium,
   type Browser,
+  type BrowserContext,
   type Page,
   type ConsoleMessage,
   type Request,
   type Response
 } from 'playwright'
+import fs from 'node:fs'
+import path from 'node:path'
 
 import { waitFor } from '../utils/wait-for'
 
@@ -27,12 +30,14 @@ export interface NetworkRequest {
 
 export class BrowserManager {
   private static instance: BrowserManager | null = null
-  private browser: Browser | null = null
+  private browser: BrowserContext | null = null
+  private browserInstance: Browser | null = null
   private page: Page | null = null
   private consoleBuffer: string[] = []
   private networkRequests: NetworkRequest[] = []
   private requestIdCounter: number = 0
   private isNavigating: boolean = false
+  private isPersistent: boolean = true
 
   private constructor() {}
 
@@ -44,12 +49,37 @@ export class BrowserManager {
     return BrowserManager.instance
   }
 
+  /**
+   * Create a new BrowserManager instance with specified persistence mode.
+   * Note: This will close any existing browser instance.
+   * @param persistent - If true, browser data will persist across sessions. If false, browser runs in ephemeral mode.
+   * @returns BrowserManager instance
+   */
+  static async createInstance(
+    persistent: boolean = true
+  ): Promise<BrowserManager> {
+    const instance = BrowserManager.getInstance()
+
+    if (instance.browser && instance.isPersistent !== persistent) {
+      await instance.close()
+    }
+
+    instance.setPersistent(persistent)
+    return instance
+  }
+
   async close(): Promise<void> {
     if (!this.browser) {
       return
     }
 
     await this.browser.close()
+
+    if (this.browserInstance) {
+      await this.browserInstance.close()
+      this.browserInstance = null
+    }
+
     this.browser = null
     this.page = null
     this.consoleBuffer = []
@@ -92,22 +122,66 @@ export class BrowserManager {
     this.requestIdCounter = 0
   }
 
+  /**
+   * Set whether the browser should persist data across sessions.
+   * @param persistent - If true, browser data will persist. If false, runs in ephemeral mode.
+   * @throws Error if browser is currently running
+   */
+  setPersistent(persistent: boolean): void {
+    if (this.browser) {
+      throw new Error(
+        'Cannot change persistence mode while browser is running. Call close() first.'
+      )
+    }
+    this.isPersistent = persistent
+  }
+
+  /**
+   * Check if the browser is configured to run in persistent mode.
+   * @returns true if persistent, false if ephemeral
+   */
+  isPersistentMode(): boolean {
+    return this.isPersistent
+  }
+
   async launch(): Promise<void> {
     if (this.browser) {
       return
     }
 
     try {
-      console.error('Launching browser...')
-
       const isHeadless = process.env.HEADLESS === 'true'
 
-      this.browser = await chromium.launch({
-        headless: isHeadless,
-        timeout: 5_000
-      })
+      if (this.isPersistent) {
+        console.error('Launching persistent browser...')
 
-      console.error(`Browser launched successfully (headless: ${isHeadless})`)
+        const userDataDir =
+          process.env.MCP_USER_DATA_DIR ||
+          path.resolve(process.cwd(), '.mcp-user-data') // fallback local profile
+
+        // ensure the directory exists
+        fs.mkdirSync(userDataDir, { recursive: true })
+
+        this.browser = await chromium.launchPersistentContext(userDataDir, {
+          headless: isHeadless
+        })
+
+        console.error(
+          `Persistent browser launched successfully (headless: ${isHeadless})`
+        )
+      } else {
+        console.error('Launching ephemeral browser...')
+
+        this.browserInstance = await chromium.launch({
+          headless: isHeadless
+        })
+
+        this.browser = await this.browserInstance.newContext()
+
+        console.error(
+          `Ephemeral browser launched successfully (headless: ${isHeadless})`
+        )
+      }
     } catch (error) {
       console.error('Error launching browser:', error)
       throw error
@@ -126,13 +200,11 @@ export class BrowserManager {
     this.networkRequests = []
     this.requestIdCounter = 0
 
-    const context = await this.browser!.newContext()
-
     if (this.page) {
       await this.page.close()
     }
 
-    this.page = await context.newPage()
+    this.page = await this.browser!.newPage()
 
     this.page.on('console', (msg: ConsoleMessage) => {
       this.consoleBuffer.push(`[${msg.type()}] ${msg.text()}`)

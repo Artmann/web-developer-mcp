@@ -1,5 +1,9 @@
 # dependencies (bun install)
 node_modules
+bun.lockb
+
+# profiles
+.mcp-user-data
 
 # output
 out
