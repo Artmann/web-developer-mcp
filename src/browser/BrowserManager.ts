@@ -1,3 +1,5 @@
+import { execSync } from 'child_process'
+
 import {
   chromium,
   type Browser,
@@ -102,15 +104,26 @@ export class BrowserManager {
 
       const isHeadless = process.env.HEADLESS === 'true'
 
-      this.browser = await chromium.launch({
-        headless: isHeadless,
-        timeout: 5_000
-      })
+      this.browser = await chromium.launch({ headless: isHeadless, timeout: 5_000 })
 
       console.error(`Browser launched successfully (headless: ${isHeadless})`)
     } catch (error) {
-      console.error('Error launching browser:', error)
-      throw error
+      const message = error instanceof Error ? error.message : String(error)
+
+      if (message.includes("Executable doesn't exist")) {
+        console.error('Playwright browsers not found. Installing chromium...')
+        execSync('npx playwright install chromium', { stdio: 'inherit' })
+        console.error('Installation complete. Retrying browser launch...')
+
+        const isHeadless = process.env.HEADLESS === 'true'
+
+        this.browser = await chromium.launch({ headless: isHeadless, timeout: 30_000 })
+
+        console.error(`Browser launched successfully (headless: ${isHeadless})`)
+      } else {
+        console.error('Error launching browser:', error)
+        throw error
+      }
     }
   }
 
