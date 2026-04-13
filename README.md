@@ -70,7 +70,7 @@ Add this server to your AI assistant's MCP configuration:
 
 ### Cursor
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-developer-mcp&config=eyJjb21tYW5kIjoibnB4IC15IHdlYi1kZXZlbG9wZXItbWNwIn0%3D)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=web-developer-mcp&config=eyJjb21tYW5kIjoibnB4IC15IHdlYi1kZXZlbG9wZXItbWNwQGxhdGVzdCJ9)
 
 Or manually add to your MCP configuration file:
 
@@ -78,7 +78,7 @@ Or manually add to your MCP configuration file:
 {
   "web-developer-mcp": {
     "command": "npx",
-    "args": ["web-developer-mcp"]
+    "args": ["web-developer-mcp@latest"]
   }
 }
 ```
@@ -88,7 +88,7 @@ Or manually add to your MCP configuration file:
 Add this server using the Claude Code CLI:
 
 ```bash
-claude mcp add -s user web-developer-mcp npx web-developer-mcp
+claude mcp add -s user web-developer-mcp npx web-developer-mcp@latest
 ```
 
 ## Available Tools
@@ -293,19 +293,24 @@ You have access to browser automation tools via web-developer-mcp:
 
 **Browser:** `browser-navigate(url)`, `browser-reload()`
 
-**Interactions:** `click-element(selector)`, `fill-input(selector, value)`, `submit-form(selector)`
+**Interactions:** `click-element(selector)`, `fill-input(selector, value)`,
+`submit-form(selector)`
 
 **Console:** `browser-console(filter?, head?, tail?)` - Get logs/errors/warnings
+
 - Filter by text: `browser-console(filter='[error]')`
 - Last N logs: `browser-console(tail=10)`
 
 **DOM:** `inspect-elements(selector)`, `extract-html(selector)`
 
-**Network:** `network-requests(filter?, statusRange?, head?, tail?)`, `network-inspect(id|urlPattern)`, `network-clear()`
+**Network:** `network-requests(filter?, statusRange?, head?, tail?)`,
+`network-inspect(id|urlPattern)`, `network-clear()`
+
 - Failed requests: `network-requests(statusRange='400-599')`
 - API calls: `network-requests(filter='/api/', tail=5)`
 
-Use for debugging web apps, interacting with pages, analyzing network requests, inspecting console errors, or examining DOM elements.
+Use for debugging web apps, interacting with pages, analyzing network requests,
+inspecting console errors, or examining DOM elements.
 ```
 
 ## Common Use Cases

@@ -104,7 +104,10 @@ export class BrowserManager {
 
       const isHeadless = process.env.HEADLESS === 'true'
 
-      this.browser = await chromium.launch({ headless: isHeadless, timeout: 5_000 })
+      this.browser = await chromium.launch({
+        headless: isHeadless,
+        timeout: 5_000
+      })
 
       console.error(`Browser launched successfully (headless: ${isHeadless})`)
     } catch (error) {
@@ -117,7 +120,10 @@ export class BrowserManager {
 
         const isHeadless = process.env.HEADLESS === 'true'
 
-        this.browser = await chromium.launch({ headless: isHeadless, timeout: 30_000 })
+        this.browser = await chromium.launch({
+          headless: isHeadless,
+          timeout: 30_000
+        })
 
         console.error(`Browser launched successfully (headless: ${isHeadless})`)
       } else {

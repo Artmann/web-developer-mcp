@@ -41,12 +41,16 @@ export async function submitHandler({ selector }: { selector: string }) {
       }),
       page.locator(selector).evaluate((form: any) => {
         // Try to find and click a submit button
-        const submitButton = form.querySelector('button[type="submit"], input[type="submit"]')
+        const submitButton = form.querySelector(
+          'button[type="submit"], input[type="submit"]'
+        )
         if (submitButton) {
           submitButton.click()
         } else {
           // If no submit button, dispatch the submit event
-          form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+          form.dispatchEvent(
+            new Event('submit', { bubbles: true, cancelable: true })
+          )
         }
       })
     ])
