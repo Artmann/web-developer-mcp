@@ -31,7 +31,8 @@ with these tasks.
 
 - **Live Browser Integration**: Uses Playwright with a persistent browser
   session
-- **Page Interactions**: Click elements, fill form inputs, and submit forms
+- **Page Interactions**: Click elements, fill form inputs, submit forms, and
+  simulate keyboard input
 - **Network Request Monitoring**: Capture and analyze HTTP requests/responses
 - **Real-time Console Monitoring**: Captures console logs, errors, and warnings
   as they happen
@@ -161,6 +162,33 @@ Submit a form element.
 - Submit forms after filling inputs
 - Trigger form validation
 - Test form submission workflows
+
+#### `press-key`
+
+Simulate keyboard input: a full key press (keydown+keyup), an isolated
+keydown or keyup, or a timed hold of a specific duration. Events are sent to
+whichever element currently has focus.
+
+**Parameters:**
+
+- `key` (string): Playwright key name to send (e.g. `"a"`, `"ArrowUp"`,
+  `"Escape"`, `"Shift+A"`). Combo syntax (`"+"`) only works with action
+  `"press"`, not `"down"`/`"up"`
+- `action` (string, optional): `"press"` (default, keydown+keyup), `"down"`
+  (keydown only, leaves the key held until a matching `"up"` call), or `"up"`
+  (keyup only)
+- `durationMs` (number, optional): Hold the key down for this many
+  milliseconds before releasing. Only valid with action `"press"`; errors if
+  combined with `"down"`/`"up"`
+
+**Example use cases:**
+
+- Drive WASD-style camera or movement controls in a game via keydown/keyup
+  listeners
+- Hold two keys down simultaneously (e.g. diagonal movement) across separate
+  tool calls
+- Hold a movement key for a precise duration
+- Dismiss a modal or overlay with `Escape`
 
 ### Console Monitoring
 
@@ -294,7 +322,7 @@ You have access to browser automation tools via web-developer-mcp:
 **Browser:** `browser-navigate(url)`, `browser-reload()`
 
 **Interactions:** `click-element(selector)`, `fill-input(selector, value)`,
-`submit-form(selector)`
+`submit-form(selector)`, `press-key(key, action?, durationMs?)`
 
 **Console:** `browser-console(filter?, head?, tail?)` - Get logs/errors/warnings
 
