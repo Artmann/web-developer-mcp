@@ -9,6 +9,7 @@ import { navigateHandler } from './tools/navigate'
 import { networkClearHandler } from './tools/network-clear'
 import { networkInspectHandler } from './tools/network-inspect'
 import { networkRequestsHandler } from './tools/network-requests'
+import { pressKeyHandler } from './tools/press-key'
 import { queryDomHandler } from './tools/query-dom'
 import { queryHtmlHandler } from './tools/query-html'
 import { reloadHandler } from './tools/reload'
@@ -208,6 +209,36 @@ export class Server {
         }
       },
       fillHandler
+    )
+
+    this.mcpServer.registerTool(
+      'press-key',
+      {
+        title: 'Press Key',
+        description:
+          'Simulate keyboard input on the page: a full key press (keydown+keyup), an isolated keydown or keyup (to hold a key across multiple tool calls, e.g. holding two keys simultaneously), or a timed hold of a specific duration. Sends events to whichever element currently has focus (click an element first if needed).',
+        inputSchema: {
+          key: z
+            .string()
+            .describe(
+              'Playwright key name to send, e.g. "a", "ArrowUp", "Escape", "Shift+A". Combo syntax ("+") is only supported with action "press", not "down"/"up".'
+            ),
+          action: z
+            .enum(['press', 'down', 'up'])
+            .optional()
+            .describe(
+              "Type of key event to send. 'press' (default) sends keydown+keyup. 'down' sends only keydown, leaving the key held until a matching 'up' call. 'up' sends only keyup."
+            ),
+          durationMs: z
+            .number()
+            .positive()
+            .optional()
+            .describe(
+              "Hold the key down for this many milliseconds before releasing (only valid with action 'press' or when action is omitted; errors if combined with action 'down' or 'up')"
+            )
+        }
+      },
+      pressKeyHandler
     )
 
     this.mcpServer.registerTool(
