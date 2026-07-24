@@ -39,6 +39,8 @@ with these tasks.
   and visibility
 - **HTML Extraction**: Raw markup extraction similar to React Testing Library
   queries
+- **Visual Capture**: Screenshot the viewport, full page, or a single element
+  to verify canvas, WebGL, layout, or animation state
 
 ## Installation
 
@@ -222,6 +224,33 @@ Testing Library queries).
 - Analyze rendered output
 - Debug template rendering issues
 
+### Visual Capture
+
+#### `browser-screenshot`
+
+Capture a PNG screenshot of the current page for visual verification of
+canvas, WebGL, layout, or animation state that DOM inspection can't show.
+Returns image content rather than text.
+
+**Parameters:**
+
+- `selector` (string, optional): CSS selector for a single element to
+  screenshot (e.g. `"canvas.game"`, `"#chart"`). Cannot be combined with
+  `fullPage`
+- `fullPage` (boolean, optional): Capture the full scrollable page instead of
+  only the visible viewport. Defaults to `false`. Cannot be combined with
+  `selector`
+
+**Returns:** A PNG image (viewport by default, full page, or a single
+element)
+
+**Example use cases:**
+
+- Verify canvas/WebGL rendering (e.g. a Three.js scene's camera framing)
+- Capture layout state that's hard to describe from the DOM alone
+- Check animation or transition state at a point in time
+- Screenshot a specific component or chart for visual review
+
 ### Network Request Monitoring
 
 #### `network-requests`
@@ -302,6 +331,10 @@ You have access to browser automation tools via web-developer-mcp:
 - Last N logs: `browser-console(tail=10)`
 
 **DOM:** `inspect-elements(selector)`, `extract-html(selector)`
+
+**Visual:** `browser-screenshot(selector?, fullPage?)` - Capture a PNG
+screenshot (viewport, full page, or a single element) for visual verification
+of canvas/WebGL/layout/animation state
 
 **Network:** `network-requests(filter?, statusRange?, head?, tail?)`,
 `network-inspect(id|urlPattern)`, `network-clear()`
