@@ -268,6 +268,14 @@ describe('press-key tool', () => {
 <head><meta charset="UTF-8"><title>Combo Test</title></head>
 <body>
     <input type="text" id="test-input" />
+    <div id="result"></div>
+    <script>
+        const input = document.getElementById('test-input');
+        const result = document.getElementById('result');
+        input.addEventListener('input', () => {
+            result.textContent = 'value:' + input.value;
+        });
+    </script>
 </body>
 </html>`
 
@@ -291,10 +299,10 @@ describe('press-key tool', () => {
     })
 
     const htmlResult = await client.callTool('extract-html', {
-      selector: '#test-input'
+      selector: '#result'
     })
 
-    expect(htmlResult.content[0].text).toContain('value="A"')
+    expect(htmlResult.content[0].text).toContain('value:A')
   })
 
   it('should dismiss an overlay on Escape', async () => {
