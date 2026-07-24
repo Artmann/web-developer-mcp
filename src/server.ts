@@ -13,6 +13,7 @@ import { pressKeyHandler } from './tools/press-key'
 import { queryDomHandler } from './tools/query-dom'
 import { queryHtmlHandler } from './tools/query-html'
 import { reloadHandler } from './tools/reload'
+import { screenshotHandler } from './tools/screenshot'
 import { submitHandler } from './tools/submit'
 
 export class Server {
@@ -109,6 +110,30 @@ export class Server {
         }
       },
       queryHtmlHandler
+    )
+
+    this.mcpServer.registerTool(
+      'browser-screenshot',
+      {
+        title: 'Capture Screenshot',
+        description:
+          'Capture a PNG screenshot of the current page for visual verification of canvas, WebGL, layout, or animation state that DOM inspection cannot show. Captures the viewport by default, the full scrollable page with fullPage, or a single element with selector.',
+        inputSchema: {
+          selector: z
+            .string()
+            .optional()
+            .describe(
+              'CSS selector for a single element to screenshot (e.g. "canvas.game", "#chart"). Cannot be combined with fullPage=true.'
+            ),
+          fullPage: z
+            .boolean()
+            .optional()
+            .describe(
+              'Capture the full scrollable page instead of only the visible viewport. Defaults to false. Cannot be combined with selector.'
+            )
+        }
+      },
+      screenshotHandler
     )
 
     this.mcpServer.registerTool(
