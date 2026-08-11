@@ -103,11 +103,16 @@ export class BrowserManager {
       console.error('Launching browser...')
 
       const isHeadless = process.env.HEADLESS === 'true'
-
-      this.browser = await chromium.launch({
+      const launchOptions = {
         headless: isHeadless,
         timeout: 5_000
-      })
+      }
+
+      if (process.env.CHROME_USER_DATA_DIR) {
+        launchOptions.args = [`--user-data-dir=${process.env.CHROME_USER_DATA_DIR}`]
+      }
+
+      this.browser = await chromium.launch(launchOptions)
 
       console.error(`Browser launched successfully (headless: ${isHeadless})`)
     } catch (error) {
@@ -119,11 +124,16 @@ export class BrowserManager {
         console.error('Installation complete. Retrying browser launch...')
 
         const isHeadless = process.env.HEADLESS === 'true'
-
-        this.browser = await chromium.launch({
+        const retryOptions = {
           headless: isHeadless,
           timeout: 30_000
-        })
+        }
+
+        if (process.env.CHROME_USER_DATA_DIR) {
+          retryOptions.args = [`--user-data-dir=${process.env.CHROME_USER_DATA_DIR}`]
+        }
+
+        this.browser = await chromium.launch(retryOptions)
 
         console.error(`Browser launched successfully (headless: ${isHeadless})`)
       } else {
